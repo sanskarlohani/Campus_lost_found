@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unilink/navigation/router_refresh.dart';
 import 'package:unilink/navigation/routes.dart';
 import 'package:unilink/screens/home_screen.dart';
 import 'package:unilink/screens/item_detail_screen.dart';
@@ -10,7 +11,11 @@ import 'package:unilink/screens/profile_screen.dart';
 import 'package:unilink/screens/report_item_screen.dart';
 import 'package:unilink/screens/signup_screen.dart';
 
-final router = GoRouter(
+GoRouter createRouter() => GoRouter(
+  // Re-run redirects when auth state changes
+  refreshListenable: GoRouterRefreshStream(
+    FirebaseAuth.instance.authStateChanges(),
+  ),
   initialLocation: Routes.login,
   redirect: (BuildContext context, GoRouterState state) {
     final isAuth = FirebaseAuth.instance.currentUser != null;

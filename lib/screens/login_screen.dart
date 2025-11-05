@@ -41,9 +41,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
       
       if (!mounted) return;
-      
-      print('Auth State: ${FirebaseAuth.instance.currentUser?.uid}');
-      // The router will handle redirection automatically based on auth state
+      // Navigate immediately; router will also refresh via auth stream
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (!mounted) return;
+        context.go(Routes.home);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
