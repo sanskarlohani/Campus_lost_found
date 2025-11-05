@@ -9,7 +9,6 @@ final userServiceProvider = Provider<UserService>((ref) {
 });
 
 final userProfileProvider = StreamProvider<User?>((ref) {
-  final service = ref.watch(userServiceProvider);
   return FirebaseFirestore.instance
       .collection('users')
       .doc(FirebaseAuth.instance.currentUser?.uid)

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod/src/framework.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/navigation/routes.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -9,7 +8,9 @@ import 'package:timeago/timeago.dart' as timeago;
 class ItemsList extends ConsumerWidget {
   final AsyncValue<List<LostFoundItem>> items;
   final String emptyMessage;
-  final ProviderOrFamily provider;
+  // Accept any provider to invalidate on pull-to-refresh.
+  // Using dynamic here avoids importing Riverpod internals.
+  final dynamic provider;
 
   const ItemsList({
     super.key,

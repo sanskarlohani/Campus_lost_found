@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:unilink/models/lost_found_item.dart';
@@ -46,7 +47,7 @@ class LostFoundService {
       });
 
       return stream.handleError((error) {
-        print('Error fetching items: $error');
+        dev.log('Error fetching items: $error', name: 'LostFoundService');
         if (error.toString().contains('requires an index')) {
           // Create a new stream with empty list while index is being built
           return Stream.value(<LostFoundItem>[]);
@@ -55,7 +56,7 @@ class LostFoundService {
       }).asBroadcastStream();
     } catch (e) {
       // Handle any synchronous errors
-      print('Unexpected error in getItemsByType: $e');
+      dev.log('Unexpected error in getItemsByType: $e', name: 'LostFoundService');
       return Stream.value(<LostFoundItem>[]);
     }
   }

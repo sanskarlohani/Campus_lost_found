@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/services/item_service.dart';

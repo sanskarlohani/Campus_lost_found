@@ -7,24 +7,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:unilink/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const UniLinkApp());
+  testWidgets('App builds with minimal router', (WidgetTester tester) async {
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const Text('Hello')),
+      ],
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(UniLinkApp(router: router));
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the root route widget is present
+    expect(find.text('Hello'), findsOneWidget);
   });
 }

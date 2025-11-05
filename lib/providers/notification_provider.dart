@@ -17,10 +17,12 @@ final notificationsProvider = StreamProvider<List<NotificationItem>>((ref) {
           .toList());
 });
 
-final unreadNotificationCountProvider = StreamProvider<int>((ref) {
-  final notificationsStream = ref.watch(notificationsProvider.stream);
-  return notificationsStream.map((notifications) => 
-    notifications.where((notification) => !notification.isRead).length
+final unreadNotificationCountProvider = Provider<int>((ref) {
+  final asyncNotifications = ref.watch(notificationsProvider);
+  return asyncNotifications.maybeWhen(
+    data: (notifications) =>
+        notifications.where((notification) => !notification.isRead).length,
+    orElse: () => 0,
   );
 });
 

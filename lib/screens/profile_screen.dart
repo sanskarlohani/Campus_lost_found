@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -139,12 +138,17 @@ class ProfileScreen extends ConsumerWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 2,
         onTap: (index) {
-          if (index == 0) {
-            context.go(Routes.home);
-          } else if (index == 1) {
-            // TODO: Implement notifications
+          switch (index) {
+            case 0:
+              context.go(Routes.home);
+              break;
+            case 1:
+              context.go(Routes.notifications);
+              break;
+            case 2:
+              // Already on profile
+              break;
           }
-          // Don't need to handle index 2 as we're already on profile
         },
         items: const [
           BottomNavigationBarItem(

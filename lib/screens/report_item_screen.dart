@@ -57,8 +57,9 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
         title: 'New ${_type.toUpperCase()} Item Reported',
         message: _titleController.text,
         type: _type,
-        itemId: createdItem.id ?? '',
+        itemId: createdItem.id,
       );
+      if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Item reported successfully')),
