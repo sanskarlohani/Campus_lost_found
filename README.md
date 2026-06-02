@@ -1,6 +1,6 @@
 # UniLink - Lost and Found App
 
-UniLink is a cross-platform Flutter application designed to help university students manage and track lost and found items within their campus community. The app provides a platform for students to report lost items, post found items, and facilitate the return of lost belongings across **iPhones, Android phones, Web, Windows, macOS, and Linux**.
+UniLink is a cross-platform Flutter application designed to help university students manage and track lost and found items within their campus community. The app provides a platform for students to report lost items, post found items, and facilitate the return of lost belongings across **iPhones, Android phones, Web, Windows, macOS, and Linux**. 
 
 ## Features
 
