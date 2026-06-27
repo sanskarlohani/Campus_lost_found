@@ -67,9 +67,13 @@ class LostFoundService {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
+    return getUserItemsForUser(user.uid);
+  }
+
+  Stream<List<LostFoundItem>> getUserItemsForUser(String uid) {
     return _firestore
         .collection('lost_found_items')
-        .where('userId', isEqualTo: user.uid)
+        .where('userId', isEqualTo: uid)
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
