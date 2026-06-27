@@ -58,11 +58,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       await ref.read(userServiceProvider).updateProfile(user);
       
       if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
+      );
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating profile: $e')),
+        SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) {
@@ -73,104 +76,101 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        actions: [
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              ),
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveProfile,
-            ),
-        ],
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0),
           children: [
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: colorScheme.primary.withOpacity(0.1),
+                    child: Icon(Icons.person_outline_rounded, size: 50, color: colorScheme.primary),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: colorScheme.primary, shape: BoxShape.circle),
+                      child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: 'Name',
-                prefixIcon: Icon(Icons.person),
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person_outline_rounded),
+                hintText: 'Enter your full name',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
+              validator: (value) => value == null || value.isEmpty ? 'Please enter your name' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _sicController,
               decoration: const InputDecoration(
-                labelText: 'SIC',
-                prefixIcon: Icon(Icons.badge),
+                labelText: 'SIC / Student ID',
+                prefixIcon: Icon(Icons.badge_outlined),
+                hintText: 'Enter your student ID',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your SIC';
-                }
-                return null;
-              },
+              validator: (value) => value == null || value.isEmpty ? 'Please enter your SIC' : null,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _yearController,
-              decoration: const InputDecoration(
-                labelText: 'Year',
-                prefixIcon: Icon(Icons.calendar_today),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your year';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _semesterController,
-              decoration: const InputDecoration(
-                labelText: 'Semester',
-                prefixIcon: Icon(Icons.school),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your semester';
-                }
-                return null;
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _yearController,
+                    decoration: const InputDecoration(
+                      labelText: 'Year',
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
+                      hintText: 'e.g. 3rd Year',
+                    ),
+                    validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _semesterController,
+                    decoration: const InputDecoration(
+                      labelText: 'Semester',
+                      prefixIcon: Icon(Icons.school_outlined),
+                      hintText: 'e.g. 5th Sem',
+                    ),
+                    validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _collegeController,
               decoration: const InputDecoration(
-                labelText: 'College',
-                prefixIcon: Icon(Icons.location_city),
+                labelText: 'College / Department',
+                prefixIcon: Icon(Icons.location_city_outlined),
+                hintText: 'Enter your college name',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your college';
-                }
-                return null;
-              },
+              validator: (value) => value == null || value.isEmpty ? 'Please enter your college' : null,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _saveProfile,
+              child: _isLoading
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Save Changes'),
             ),
           ],
         ),

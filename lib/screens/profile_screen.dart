@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unilink/models/user.dart';
 import 'package:unilink/navigation/routes.dart';
-import 'package:unilink/providers/auth_provider.dart';
-import 'package:unilink/providers/user_provider.dart' as user_provider;
+import 'package:unilink/providers/auth_provider.dart' as auth;
+import 'package:unilink/providers/lost_found_provider.dart' as lost_found;
+import 'package:unilink/providers/user_provider.dart' as user_prov;
 import 'package:unilink/screens/edit_profile_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -21,147 +22,321 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userProfile = ref.watch(user_provider.userProfileProvider);
+    final userProfile = ref.watch(user_prov.userProfileProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Profile'),
+        title: const Text('My Profile'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => _editProfile(
-              context,
-              ref,
-              userProfile.value,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout_rounded),
             onPressed: () async {
-              await ref.read(authProvider.notifier).signOut();
-              if (context.mounted) {
-                context.go(Routes.login);
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Logout'),
+                  content: const Text('Are you sure you want to logout?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Logout'),
+                    ),
+                  ],
+                ),
+              );
+              
+              if (confirm == true) {
+                await ref.read(auth.authProvider.notifier).signOut();
+                if (context.mounted) {
+                  context.go(Routes.login);
+                }
               }
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: userProfile.when(
         data: (user) {
-          if (user == null) {
+          // Check if profile is essentially empty (only name and email from signup)
+          final isIncomplete = user == null || 
+                              (user.sic.isEmpty && user.college.isEmpty);
+
+          if (isIncomplete) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Complete your profile to get started',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => _editProfile(context, ref, null),
-                    child: const Text('Complete Profile'),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.account_circle_outlined, size: 80, color: colorScheme.primary.withOpacity(0.2)),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Profile Incomplete',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Complete your profile to let others identify you when you find or lose an item.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: () => _editProfile(context, ref, null),
+                      child: const Text('Complete Profile'),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                Hero(
-                  tag: 'profile-avatar',
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontSize: 32, color: Colors.white),
-                    ),
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colorScheme.primary, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          child: Text(
+                            user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                            style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                            onPressed: () => _editProfile(context, ref, user),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   user.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
                 Text(
                   user.email,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                  style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
                 ),
                 const SizedBox(height: 32),
-                Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 0),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.badge),
-                        title: const Text('SIC'),
-                        subtitle: Text(user.sic.isNotEmpty ? user.sic : 'Not set'),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.school),
-                        title: const Text('Year'),
-                        subtitle: Text(user.year.isNotEmpty ? user.year : 'Not set'),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.calendar_today),
-                        title: const Text('Semester'),
-                        subtitle: Text(user.semester.isNotEmpty ? user.semester : 'Not set'),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.location_city),
-                        title: const Text('College'),
-                        subtitle: Text(user.college.isNotEmpty ? user.college : 'Not set'),
-                      ),
-                    ],
+                _buildInfoSection(context, user),
+                const SizedBox(height: 24),
+                ref.watch(lost_found.userItemStatsProvider).when(
+                  data: (stats) => _buildStatCards(
+                    context, 
+                    stats['reported'] ?? 0, 
+                    stats['found'] ?? 0,
+                    user.karmaPoints,
                   ),
+                  loading: () => const Center(child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  )),
+                  error: (_, __) => _buildStatCards(context, 0, 0, user.karmaPoints),
                 ),
+                const SizedBox(height: 32),
               ],
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
-        error: (error, stackTrace) => Center(
-          child: Text('Error: $error'),
+        child: BottomNavigationBar(
+          currentIndex: 2,
+          elevation: 0,
+          backgroundColor: colorScheme.surface,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                context.go(Routes.home);
+                break;
+              case 1:
+                context.go(Routes.notifications);
+                break;
+              case 2:
+                break;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_outlined),
+              activeIcon: Icon(Icons.notifications_rounded),
+              label: 'Alerts',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go(Routes.home);
-              break;
-            case 1:
-              context.go(Routes.notifications);
-              break;
-            case 2:
-              // Already on profile
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+    );
+  }
+
+  Widget _buildInfoSection(BuildContext context, User user) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05)),
+      ),
+      child: Column(
+        children: [
+          _buildInfoRow(context, Icons.badge_outlined, 'SIC', user.sic),
+          const Divider(height: 32),
+          _buildInfoRow(context, Icons.school_outlined, 'Year', user.year),
+          const Divider(height: 32),
+          _buildInfoRow(context, Icons.calendar_month_outlined, 'Semester', user.semester),
+          const Divider(height: 32),
+          _buildInfoRow(context, Icons.location_city_outlined, 'College', user.college),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              value.isNotEmpty ? value : 'Not set',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCards(BuildContext context, int reported, int found, int karma) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 32) / 3;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: cardWidth,
+              child: _StatCard(
+                label: 'Posts',
+                value: reported.toString(),
+                icon: Icons.upload_file_rounded,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _StatCard(
+                label: 'Resolved',
+                value: found.toString(),
+                icon: Icons.check_circle_rounded,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(
+              width: cardWidth,
+              child: _StatCard(
+                label: 'Karma',
+                value: karma.toString(),
+                icon: Icons.auto_awesome_rounded,
+                color: Colors.orange,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.1)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: color.withOpacity(0.8), fontWeight: FontWeight.w500),
           ),
         ],
       ),

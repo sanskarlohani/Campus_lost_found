@@ -23,10 +23,19 @@ class AuthService {
         password: password,
       );
       
+      // Update display name in Auth
+      await userCredential.user!.updateDisplayName(name);
+      
       // Create user profile in Firestore
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
         'name': name,
         'email': email,
+        'sic': '',
+        'year': '',
+        'semester': '',
+        'college': '',
+        'karmaPoints': 0,
         'createdAt': FieldValue.serverTimestamp(),
       });
       

@@ -2,10 +2,12 @@ import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:unilink/models/lost_found_item.dart';
+import 'package:unilink/providers/notification_provider.dart';
 
 class LostFoundService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NotificationService _notificationService = NotificationService();
 
   Future<LostFoundItem> createItem(LostFoundItem item) async {
     final user = _auth.currentUser;
@@ -75,11 +77,90 @@ class LostFoundService {
             .toList());
   }
 
+  Stream<LostFoundItem?> getItemById(String itemId) {
+    return _firestore
+        .collection('lost_found_items')
+        .doc(itemId)
+        .snapshots()
+        .map((doc) => doc.exists ? LostFoundItem.fromJson(doc.data()!) : null);
+  }
+
+  Future<void> claimItem(String itemId, String message) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not logged in');
+
+    // 1. Get the item to find the owner
+    final itemDoc = await _firestore.collection('lost_found_items').doc(itemId).get();
+    if (!itemDoc.exists) throw Exception('Item not found');
+    
+    final itemData = itemDoc.data()!;
+    final ownerId = itemData['userId'];
+
+    // 2. Create a claim record
+    await _firestore.collection('claims').add({
+      'itemId': itemId,
+      'itemTitle': itemData['title'],
+      'finderId': user.uid,
+      'ownerId': ownerId,
+      'message': message,
+      'status': 'pending',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // 3. Notify the owner
+    await _notificationService.createNotification(
+      userId: ownerId,
+      title: itemData['type'] == 'lost' ? 'Item Found!' : 'New Claim Request',
+      message: '${user.displayName ?? 'Someone'} has ${itemData['type'] == 'lost' ? 'found' : 'claimed'} your ${itemData['title']}: "$message"',
+      type: 'match',
+      itemId: itemId,
+    );
+  }
+
   Future<void> updateItemStatus(String itemId, String status) async {
     await _firestore
         .collection('lost_found_items')
         .doc(itemId)
         .update({'status': status});
+  }
+
+  Future<void> resolveItem(String itemId) async {
+    // 1. Update item status
+    await updateItemStatus(itemId, 'resolved');
+
+    // 2. Find associated claims and mark them resolved
+    final claimsSnapshot = await _firestore
+        .collection('claims')
+        .where('itemId', isEqualTo: itemId)
+        .where('status', isEqualTo: 'pending')
+        .get();
+
+    final batch = _firestore.batch();
+    final Set<String> findersToReward = {};
+
+    for (var doc in claimsSnapshot.docs) {
+      batch.update(doc.reference, {'status': 'resolved'});
+      findersToReward.add(doc.data()['finderId'] as String);
+    }
+
+    // 3. Award Karma Points to finders (e.g., 10 points)
+    for (String finderId in findersToReward) {
+      final userRef = _firestore.collection('users').doc(finderId);
+      batch.update(userRef, {
+        'karmaPoints': FieldValue.increment(10),
+      });
+      
+      // Optionally notify finder that they earned points
+      await _notificationService.createNotification(
+        userId: finderId,
+        title: 'Karma Points Earned!',
+        message: 'You earned 10 Karma points for helping return an item!',
+        type: 'match',
+        itemId: itemId,
+      );
+    }
+
+    await batch.commit();
   }
 
   String getCurrentUserId() {

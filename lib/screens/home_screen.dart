@@ -30,61 +30,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UniLink'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.link, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('UniLink'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // TODO: Implement search
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         bottom: TabBar(
           controller: _tabController,
+          indicatorSize: TabBarIndicatorSize.label,
+          indicatorWeight: 3,
+          indicatorColor: colorScheme.primary,
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           tabs: const [
             Tab(text: 'Lost Items'),
             Tab(text: 'Found Items'),
           ],
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // Refresh both lost and found items
-          final lostRefresh = ref.refresh(lostItemsProvider.future);
-          final foundRefresh = ref.refresh(foundItemsProvider.future);
-          await Future.wait([lostRefresh, foundRefresh]);
-        },
-        child: TabBarView(
-          controller: _tabController,
-          children: const [
-            LostScreen(),
-            FoundScreen(),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          LostScreen(),
+          FoundScreen(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(Routes.report),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Report Item'),
+        elevation: 4,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Already on home screen
-              break;
-            case 1:
-              context.go(Routes.notifications);
-              break;
-            case 2:
-              context.go(Routes.profile);
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        child: BottomNavigationBar(
+          currentIndex: 0,
+          elevation: 0,
+          backgroundColor: colorScheme.surface,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                break;
+              case 1:
+                context.go(Routes.notifications);
+                break;
+              case 2:
+                context.go(Routes.profile);
+                break;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_outlined),
+              activeIcon: Icon(Icons.notifications_rounded),
+              label: 'Alerts',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }

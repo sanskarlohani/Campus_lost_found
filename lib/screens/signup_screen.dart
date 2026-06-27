@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:unilink/navigation/routes.dart';
 import 'package:unilink/providers/auth_provider.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -16,6 +18,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,7 +34,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    if (!value.contains('@')) {
+    // More permissive regex to allow modern and university TLDs
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(value)) {
       return 'Please enter a valid email';
     }
     return null;
@@ -70,11 +74,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       );
       
       if (!mounted) return;
-      // The router will handle redirection automatically based on auth state
+      
+      // Explicitly check for user and navigate if router didn't catch it
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (!mounted) return;
+        context.go(Routes.home);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -83,23 +95,43 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Account'),
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Join UniLink',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Help your campus community find what they\'ve lost',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+              const SizedBox(height: 32),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Full Name',
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person_outline_rounded),
+                  hintText: 'John Doe',
                 ),
+                textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Name is required';
@@ -111,20 +143,29 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                  labelText: 'Email Address',
+                  prefixIcon: Icon(Icons.email_outlined),
+                  hintText: 'name@university.edu',
                 ),
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
                 validator: _validateEmail,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
                 ),
-                obscureText: true,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.next,
                 validator: _validatePassword,
               ),
               const SizedBox(height: 16),
@@ -132,21 +173,40 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 controller: _confirmPasswordController,
                 decoration: const InputDecoration(
                   labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_reset_rounded),
                 ),
-                obscureText: true,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
                 validator: _validateConfirmPassword,
+                onFieldSubmitted: (_) => _handleSignup(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleSignup,
                 child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Sign Up'),
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Create Account'),
               ),
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text('Already have an account? Log in'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account? ',
+                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                  ),
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Login'),
+                  ),
+                ],
               ),
             ],
           ),

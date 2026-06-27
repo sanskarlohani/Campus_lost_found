@@ -11,64 +11,96 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(notificationsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text('Notifications'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // TODO: Implement mark all as read
+            },
+            child: const Text('Mark all as read'),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: notifications.when(
         data: (notificationsList) {
           if (notificationsList.isEmpty) {
-            return const Center(
-              child: Text('No notifications yet'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_none_rounded, size: 80, color: colorScheme.primary.withOpacity(0.1)),
+                  const SizedBox(height: 16),
+                  const Text('No notifications yet', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                ],
+              ),
             );
           }
 
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 12),
             itemCount: notificationsList.length,
+            separatorBuilder: (context, index) => const Divider(height: 1, indent: 72),
             itemBuilder: (context, index) {
               final notification = notificationsList[index];
               return NotificationTile(notification: notification);
             },
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, stackTrace) => Center(
-          child: Text('Error: $error'),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go(Routes.home);
-              break;
-            case 1:
-              // Already on notifications
-              break;
-            case 2:
-              context.go(Routes.profile);
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: 1,
+          elevation: 0,
+          backgroundColor: colorScheme.surface,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                context.go(Routes.home);
+                break;
+              case 1:
+                break;
+              case 2:
+                context.go(Routes.profile);
+                break;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_outlined),
+              activeIcon: Icon(Icons.notifications_rounded),
+              label: 'Alerts',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -84,83 +116,102 @@ class NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Dismissible(
       key: Key(notification.id),
       background: Container(
-        color: Colors.red,
+        color: Colors.red.shade400,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-        ),
+        padding: const EdgeInsets.only(right: 24),
+        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
         NotificationService().deleteNotification(notification.id);
       },
-      child: ListTile(
-        leading: _getNotificationIcon(notification.type),
-        title: Text(
-          notification.title,
-          style: TextStyle(
-            fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+      child: Container(
+        color: notification.isRead ? Colors.transparent : colorScheme.primary.withOpacity(0.03),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          leading: _getNotificationIcon(notification.type, colorScheme),
+          title: Text(
+            notification.title,
+            style: TextStyle(
+              fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
+              color: notification.isRead ? colorScheme.onSurface.withOpacity(0.7) : colorScheme.onSurface,
+            ),
           ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Text(
+                notification.message,
+                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _formatDate(notification.createdAt),
+                style: TextStyle(fontSize: 12, color: colorScheme.primary.withOpacity(0.7)),
+              ),
+            ],
+          ),
+          onTap: () {
+            if (!notification.isRead) {
+              NotificationService().markAsRead(notification.id);
+            }
+            context.push('${Routes.itemDetails}/${notification.itemId}');
+          },
         ),
-        subtitle: Text(notification.message),
-        trailing: Text(
-          _formatDate(notification.createdAt),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        onTap: () {
-          if (!notification.isRead) {
-            NotificationService().markAsRead(notification.id);
-          }
-          // Navigate to the relevant item
-          context.push('${Routes.itemDetails}/${notification.itemId}');
-        },
       ),
     );
   }
 
-  Widget _getNotificationIcon(String type) {
+  Widget _getNotificationIcon(String type, ColorScheme colorScheme) {
+    IconData icon;
+    Color color;
+
     switch (type) {
       case 'lost':
-        return const CircleAvatar(
-          backgroundColor: Colors.orange,
-          child: Icon(Icons.search, color: Colors.white),
-        );
+        icon = Icons.search_rounded;
+        color = Colors.orange;
+        break;
       case 'found':
-        return const CircleAvatar(
-          backgroundColor: Colors.green,
-          child: Icon(Icons.check_circle, color: Colors.white),
-        );
+        icon = Icons.inventory_2_outlined;
+        color = Colors.green;
+        break;
       case 'match':
-        return const CircleAvatar(
-          backgroundColor: Colors.blue,
-          child: Icon(Icons.compare_arrows, color: Colors.white),
-        );
+        icon = Icons.handshake_outlined;
+        color = colorScheme.primary;
+        break;
       default:
-        return const CircleAvatar(
-          backgroundColor: Colors.grey,
-          child: Icon(Icons.notifications, color: Colors.white),
-        );
+        icon = Icons.notifications_outlined;
+        color = Colors.grey;
     }
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: 24),
+    );
   }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        return '${difference.inMinutes}m ago';
-      }
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
       return '${difference.inHours}h ago';
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return '${date.day}/${date.month}';
     }
   }
 }

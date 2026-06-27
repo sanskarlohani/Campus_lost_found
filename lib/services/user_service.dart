@@ -10,7 +10,7 @@ class UserService {
     final currentUser = _auth.currentUser;
     if (currentUser == null) throw Exception('Not logged in');
 
-    await _firestore.collection('users').doc(currentUser.uid).set(
+    await _firestore.collection('users').doc(currentUser.uid).update(
       user.copyWith(
         uid: currentUser.uid,
         email: currentUser.email ?? user.email,

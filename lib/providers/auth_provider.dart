@@ -11,7 +11,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<firebase_aut
   return AuthNotifier(authService);
 });
 
-final userProfileProvider = FutureProvider<User?>((ref) async {
+final authProfileProvider = FutureProvider<User?>((ref) async {
   final authService = ref.watch(authServiceProvider);
   try {
     final doc = await authService.getUserProfile();

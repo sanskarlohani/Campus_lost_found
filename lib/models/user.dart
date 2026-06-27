@@ -6,6 +6,7 @@ class User {
   final String semester;
   final String college;
   final String uid;
+  final int karmaPoints;
 
   User({
     this.name = '',
@@ -14,8 +15,9 @@ class User {
     this.year = '',
     this.semester = '',
     this.college = '',
+    this.karmaPoints = 0,
     String? uid,
-  }) : uid = uid ?? DateTime.now().millisecondsSinceEpoch.toString();
+  }) : uid = uid ?? '';
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -25,7 +27,8 @@ class User {
       year: json['year'] as String? ?? '',
       semester: json['semester'] as String? ?? '',
       college: json['college'] as String? ?? '',
-      uid: json['uid'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      karmaPoints: json['karmaPoints'] as int? ?? 0,
+      uid: json['uid'] as String? ?? '',
     );
   }
 
@@ -38,6 +41,7 @@ class User {
       'semester': semester,
       'college': college,
       'uid': uid,
+      'karmaPoints': karmaPoints,
     };
   }
 
@@ -49,6 +53,7 @@ class User {
     String? semester,
     String? college,
     String? uid,
+    int? karmaPoints,
   }) {
     return User(
       name: name ?? this.name,
@@ -58,6 +63,7 @@ class User {
       semester: semester ?? this.semester,
       college: college ?? this.college,
       uid: uid ?? this.uid,
+      karmaPoints: karmaPoints ?? this.karmaPoints,
     );
   }
 }
