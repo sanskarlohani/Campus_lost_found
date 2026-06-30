@@ -162,6 +162,8 @@ class ProfileScreen extends ConsumerWidget {
                   error: (_, __) => _buildStatCards(context, 0, 0, user.karmaPoints),
                 ),
                 const SizedBox(height: 32),
+                _buildLeaderboard(context, ref),
+                const SizedBox(height: 40),
               ],
             ),
           );
@@ -298,6 +300,127 @@ class ProfileScreen extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildLeaderboard(BuildContext context, WidgetRef ref) {
+    final leaderboardAsync = ref.watch(user_prov.leaderboardProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.leaderboard_rounded, color: colorScheme.primary),
+            const SizedBox(width: 12),
+            Text(
+              'Campus Leaderboard',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.05)),
+          ),
+          child: leaderboardAsync.when(
+            data: (users) {
+              if (users.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: Text('No users found')),
+                );
+              }
+
+              // Sort by karma descending
+              final sortedUsers = [...users];
+              sortedUsers.sort((a, b) => b.karmaPoints.compareTo(a.karmaPoints));
+
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: sortedUsers.length > 10 ? 10 : sortedUsers.length,
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  indent: 70,
+                  color: colorScheme.onSurface.withValues(alpha: 0.05),
+                ),
+                itemBuilder: (context, index) {
+                  final user = sortedUsers[index];
+                  final isTopThree = index < 3;
+                  
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isTopThree 
+                          ? (index == 0 ? Colors.amber : (index == 1 ? Colors.grey.shade400 : Colors.brown.shade300))
+                          : colorScheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isTopThree ? Colors.white : colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      user.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      user.college,
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5)),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded, size: 14, color: Colors.orange),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${user.karmaPoints}',
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            loading: () => const Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, _) => Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Center(child: Text('Error: $err')),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

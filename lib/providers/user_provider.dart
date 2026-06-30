@@ -37,4 +37,16 @@ final otherUserProfileProvider = StreamProvider.family<User?, String>((ref, uid)
       .map((doc) => doc.exists && doc.data() != null ? User.fromJson(doc.data()!) : null);
 });
 
+final leaderboardProvider = StreamProvider<List<User>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .snapshots()
+      .map((snapshot) {
+        final users = snapshot.docs.map((doc) => User.fromJson(doc.data())).toList();
+        // Sort by karma points descending
+        users.sort((a, b) => b.karmaPoints.compareTo(a.karmaPoints));
+        return users;
+      });
+});
+
 final isEditingProfileProvider = StateProvider<bool>((ref) => false);
