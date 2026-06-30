@@ -34,7 +34,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    // More permissive regex to allow modern and university TLDs
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -75,22 +74,34 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       
       if (!mounted) return;
       
-      // Explicitly check for user and navigate if router didn't catch it
       if (FirebaseAuth.instance.currentUser != null) {
-        if (!mounted) return;
         context.go(Routes.home);
       }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      String message = 'An error occurred. Please try again.';
+      if (e.code == 'email-already-in-use') message = 'This email is already in use.';
+      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
+      else if (e.code == 'operation-not-allowed') message = 'Email/password accounts are not enabled.';
+      else if (e.code == 'weak-password') message = 'The password is too weak.';
+      
+      _showError(message);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -120,7 +131,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               Text(
                 'Help your campus community find what they\'ve lost',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 32),
@@ -200,7 +211,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 children: [
                   Text(
                     'Already have an account? ',
-                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                    style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                   TextButton(
                     onPressed: () => context.pop(),

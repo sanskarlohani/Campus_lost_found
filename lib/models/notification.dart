@@ -8,6 +8,7 @@ class NotificationItem {
   final String itemId; // Reference to the lost/found item
   final String userId; // User who should receive this notification
   final bool isRead;
+  final bool isGlobal;
   final DateTime createdAt;
 
   NotificationItem({
@@ -18,19 +19,29 @@ class NotificationItem {
     required this.itemId,
     required this.userId,
     this.isRead = false,
+    this.isGlobal = false,
     required this.createdAt,
   });
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    DateTime parsedDate;
+    if (json['createdAt'] is Timestamp) {
+      parsedDate = (json['createdAt'] as Timestamp).toDate();
+    } else {
+      // Default to now if timestamp hasn't synced yet
+      parsedDate = DateTime.now();
+    }
+
     return NotificationItem(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      message: json['message'] as String,
-      type: json['type'] as String,
-      itemId: json['itemId'] as String,
-      userId: json['userId'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      itemId: json['itemId'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
       isRead: json['isRead'] as bool? ?? false,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      isGlobal: json['isGlobal'] as bool? ?? false,
+      createdAt: parsedDate,
     );
   }
 
@@ -43,6 +54,7 @@ class NotificationItem {
       'itemId': itemId,
       'userId': userId,
       'isRead': isRead,
+      'isGlobal': isGlobal,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -55,6 +67,7 @@ class NotificationItem {
     String? itemId,
     String? userId,
     bool? isRead,
+    bool? isGlobal,
     DateTime? createdAt,
   }) {
     return NotificationItem(
@@ -65,6 +78,7 @@ class NotificationItem {
       itemId: itemId ?? this.itemId,
       userId: userId ?? this.userId,
       isRead: isRead ?? this.isRead,
+      isGlobal: isGlobal ?? this.isGlobal,
       createdAt: createdAt ?? this.createdAt,
     );
   }

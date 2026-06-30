@@ -74,7 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.account_circle_outlined, size: 80, color: colorScheme.primary.withOpacity(0.2)),
+                    Icon(Icons.account_circle_outlined, size: 80, color: colorScheme.primary.withValues(alpha: 0.2)),
                     const SizedBox(height: 24),
                     const Text(
                       'Profile Incomplete',
@@ -112,7 +112,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         child: CircleAvatar(
                           radius: 60,
-                          backgroundColor: colorScheme.primary.withOpacity(0.1),
+                          backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                           child: Text(
                             user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                             style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: colorScheme.primary),
@@ -143,12 +143,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 Text(
                   user.email,
-                  style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                  style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 32),
                 _buildInfoSection(context, user),
                 const SizedBox(height: 24),
-                ref.watch(lost_found.userItemStatsProvider).when(
+                ref.watch(lost_found.userItemStatsProvider(user.uid)).when(
                   data: (stats) => _buildStatCards(
                     context, 
                     stats['reported'] ?? 0, 
@@ -173,7 +173,7 @@ class ProfileScreen extends ConsumerWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -184,7 +184,7 @@ class ProfileScreen extends ConsumerWidget {
           elevation: 0,
           backgroundColor: colorScheme.surface,
           selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
             switch (index) {
@@ -226,7 +226,7 @@ class ProfileScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05)),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
@@ -320,9 +320,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -336,7 +336,7 @@ class _StatCard extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: color.withOpacity(0.8), fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
           ),
         ],
       ),

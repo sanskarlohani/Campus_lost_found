@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unilink/navigation/routes.dart';
-import 'package:unilink/providers/lost_found_provider.dart';
 import 'package:unilink/screens/found_screen.dart';
 import 'package:unilink/screens/lost_screen.dart';
 
@@ -63,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           indicatorWeight: 3,
           indicatorColor: colorScheme.primary,
           labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurface.withOpacity(0.6),
+          unselectedLabelColor: colorScheme.onSurface.withValues(alpha: 0.6),
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           tabs: const [
             Tab(text: 'Lost Items'),
@@ -90,7 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -101,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           elevation: 0,
           backgroundColor: colorScheme.surface,
           selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
           showSelectedLabels: true,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,

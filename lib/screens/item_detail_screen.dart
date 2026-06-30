@@ -144,12 +144,12 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withValues(alpha: 0.1),
                     child: Center(
                       child: Icon(
                         item.type == 'lost' ? Icons.search_rounded : Icons.inventory_2_outlined,
                         size: 100,
-                        color: colorScheme.primary.withOpacity(0.5),
+                        color: colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -169,7 +169,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             decoration: BoxDecoration(
                               color: (isResolved 
                                 ? Colors.grey 
-                                : (item.type == 'lost' ? Colors.orange : Colors.green)).withOpacity(0.1),
+                                : (item.type == 'lost' ? Colors.orange : Colors.green)).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -184,7 +184,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                           ),
                           Text(
                             timeStr,
-                            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.5)),
+                            style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5)),
                           ),
                         ],
                       ),
@@ -206,7 +206,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       Text(
                         item.description,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.7),
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
                               height: 1.5,
                             ),
                       ),
@@ -217,7 +217,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                         decoration: BoxDecoration(
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: colorScheme.onSurface.withOpacity(0.05)),
+                          border: Border.all(color: colorScheme.onSurface.withValues(alpha: 0.05)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +230,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                                   child: Icon(Icons.person, color: colorScheme.primary),
                                 ),
                                 const SizedBox(width: 12),
@@ -288,7 +288,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               color: colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -324,7 +324,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),

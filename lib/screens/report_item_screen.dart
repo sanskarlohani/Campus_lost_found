@@ -45,13 +45,14 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
       
       if (!mounted) return;
 
-      // Create notification for all users
+      // Create a global notification for all campus members
       await NotificationService().createNotification(
         userId: ref.read(lost_found.lostFoundServiceProvider).getCurrentUserId(),
         title: 'New ${_type.toUpperCase()} Item Reported',
         message: _titleController.text,
         type: _type,
         itemId: createdItem.id,
+        isGlobal: true,
       );
       
       if (!mounted) return;
@@ -205,10 +206,10 @@ class _TypeButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color : color.withOpacity(0.05),
+          color: isSelected ? color : color.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : color.withOpacity(0.2),
+            color: isSelected ? color : color.withValues(alpha: 0.2),
             width: 2,
           ),
         ),

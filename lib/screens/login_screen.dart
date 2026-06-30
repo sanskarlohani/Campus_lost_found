@@ -26,36 +26,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Please fill in all fields');
       return;
     }
 
     setState(() => _isLoading = true);
     
     try {
-      await ref.read(authProvider.notifier).signIn(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      await ref.read(authProvider.notifier).signIn(email, password);
       
       if (!mounted) return;
       if (FirebaseAuth.instance.currentUser != null) {
         context.go(Routes.home);
       }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      String message = 'An error occurred. Please try again.';
+      if (e.code == 'user-not-found') message = 'No user found with this email.';
+      else if (e.code == 'wrong-password') message = 'Incorrect password.';
+      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
+      else if (e.code == 'network-request-failed') message = 'Network error. Check your internet connection.';
+      
+      _showError(message);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -73,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -94,7 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Text(
                 'Login to continue finding and returning items',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 48),
@@ -117,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: colorScheme.onSurface.withOpacity(0.6),
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
@@ -156,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   Text(
                     'Don\'t have an account? ',
-                    style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                    style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                   TextButton(
                     onPressed: () => context.push(Routes.signup),

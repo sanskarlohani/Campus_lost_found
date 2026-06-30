@@ -52,13 +52,13 @@ class ItemsList extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.05),
+                      color: colorScheme.primary.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.search_rounded,
                       size: 64,
-                      color: colorScheme.primary.withOpacity(0.4),
+                      color: colorScheme.primary.withValues(alpha: 0.4),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -73,7 +73,7 @@ class ItemsList extends ConsumerWidget {
                     emptyMessage,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                   ),
                 ],
@@ -149,7 +149,7 @@ class _ItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -170,7 +170,7 @@ class _ItemCard extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.08),
+                    color: colorScheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
@@ -195,7 +195,7 @@ class _ItemCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: (item.type == 'lost' ? Colors.orange : Colors.green).withOpacity(0.1),
+                              color: (item.type == 'lost' ? Colors.orange : Colors.green).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -210,7 +210,7 @@ class _ItemCard extends StatelessWidget {
                           Text(
                             timeStr,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.4),
+                                  color: colorScheme.onSurface.withValues(alpha: 0.4),
                                 ),
                           ),
                         ],
@@ -231,7 +231,7 @@ class _ItemCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.6),
+                              color: colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                       ),
                       const SizedBox(height: 8),

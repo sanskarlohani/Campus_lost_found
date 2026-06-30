@@ -33,19 +33,22 @@ class LostFoundService {
 
   Stream<List<LostFoundItem>> getItemsByType(String type) {
     try {
-      // Create a query that will complete even if there are no documents
+      // Fetch without orderBy to avoid complex index requirements
       final query = _firestore
           .collection('lost_found_items')
           .where('type', isEqualTo: type)
-          .where('status', isEqualTo: 'active')
-          .orderBy('timestamp', descending: true)
-          .limit(50); // Add a limit to ensure the query completes
+          .where('status', isEqualTo: 'active');
 
       final stream = query.snapshots().map((snapshot) {
-        // Successfully got a snapshot (even if empty)
-        return snapshot.docs
+        final items = snapshot.docs
             .map((doc) => LostFoundItem.fromJson(doc.data()))
             .toList();
+        
+        // Sort in memory instead
+        items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        
+        // Limit to 50 items manually
+        return items.take(50).toList();
       });
 
       return stream.handleError((error) {
@@ -74,11 +77,15 @@ class LostFoundService {
     return _firestore
         .collection('lost_found_items')
         .where('userId', isEqualTo: uid)
-        .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => LostFoundItem.fromJson(doc.data()))
-            .toList());
+        .map((snapshot) {
+          final items = snapshot.docs
+              .map((doc) => LostFoundItem.fromJson(doc.data()))
+              .toList();
+          // Sort descending by timestamp in memory to avoid index requirements
+          items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          return items;
+        });
   }
 
   Stream<LostFoundItem?> getItemById(String itemId) {
@@ -129,36 +136,53 @@ class LostFoundService {
   }
 
   Future<void> resolveItem(String itemId) async {
-    // 1. Update item status
-    await updateItemStatus(itemId, 'resolved');
+    // 1. Get item details to determine the type
+    final itemDoc = await _firestore.collection('lost_found_items').doc(itemId).get();
+    if (!itemDoc.exists) return;
+    
+    final itemData = itemDoc.data()!;
+    final itemType = itemData['type'] as String;
+    final reporterId = itemData['userId'] as String;
 
-    // 2. Find associated claims and mark them resolved
+    final batch = _firestore.batch();
+    final Set<String> findersToReward = {};
+
+    // 2. Identify the hero (The Finder)
+    if (itemType == 'found') {
+      // Scenario: "I found this phone" -> Resolver (Reporter) is the finder
+      findersToReward.add(reporterId);
+    }
+
+    // 3. Mark associated claims as resolved and find finders of 'lost' items
     final claimsSnapshot = await _firestore
         .collection('claims')
         .where('itemId', isEqualTo: itemId)
         .where('status', isEqualTo: 'pending')
         .get();
 
-    final batch = _firestore.batch();
-    final Set<String> findersToReward = {};
-
     for (var doc in claimsSnapshot.docs) {
       batch.update(doc.reference, {'status': 'resolved'});
-      findersToReward.add(doc.data()['finderId'] as String);
+      
+      if (itemType == 'lost') {
+        // Scenario: "I lost my keys" -> The person who sent the claim is the finder
+        findersToReward.add(doc.data()['finderId'] as String);
+      }
     }
 
-    // 3. Award Karma Points to finders (e.g., 10 points)
+    // 4. Update the item itself
+    batch.update(itemDoc.reference, {'status': 'resolved'});
+
+    // 5. Award Karma Points (10 per person who helped)
     for (String finderId in findersToReward) {
       final userRef = _firestore.collection('users').doc(finderId);
       batch.update(userRef, {
         'karmaPoints': FieldValue.increment(10),
       });
       
-      // Optionally notify finder that they earned points
       await _notificationService.createNotification(
         userId: finderId,
-        title: 'Karma Points Earned!',
-        message: 'You earned 10 Karma points for helping return an item!',
+        title: 'Karma Points Earned! 🌟',
+        message: 'You earned 10 Karma points for helping return this item!',
         type: 'match',
         itemId: itemId,
       );

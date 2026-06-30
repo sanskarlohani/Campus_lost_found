@@ -34,8 +34,7 @@ android {
     dependencies {
         implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
         implementation("com.google.firebase:firebase-analytics")
-        implementation("com.android.support:multidex:1.0.3")
-        implementation("com.google.android.gms:play-services-safetynet:18.0.1")
+        implementation("androidx.multidex:multidex:2.0.1")
         implementation("com.google.android.gms:play-services-base:18.2.0")
     }
 

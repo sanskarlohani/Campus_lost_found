@@ -17,24 +17,23 @@ final foundItemsProvider = StreamProvider<List<LostFoundItem>>((ref) {
   return service.getItemsByType('found');
 });
 
-final userItemsProvider = StreamProvider<List<LostFoundItem>>((ref) {
-  // Watch auth state to reactively fetch items when user logs in
-  final authState = ref.watch(authProvider);
-  final user = authState.value;
-  
-  if (user == null) return Stream.value([]);
+// Changed to family to support viewing stats for any user
+final userItemsProvider = StreamProvider.family<List<LostFoundItem>, String>((ref, uid) {
+  if (uid.isEmpty) return Stream.value([]);
   
   final service = ref.watch(lostFoundServiceProvider);
-  return service.getUserItemsForUser(user.uid);
+  return service.getUserItemsForUser(uid);
 });
 
-final itemDetailProvider = StreamProvider.family<LostFoundItem?, String>((ref, id) {
+// Detail provider for a single item
+final itemDetailProvider = StreamProvider.family<LostFoundItem?, String>((ref, itemId) {
   final service = ref.watch(lostFoundServiceProvider);
-  return service.getItemById(id);
+  return service.getItemById(itemId);
 });
 
-final userItemStatsProvider = Provider<AsyncValue<Map<String, int>>>((ref) {
-  final userItems = ref.watch(userItemsProvider);
+// Changed to family to calculate stats for a specific user ID
+final userItemStatsProvider = Provider.family<AsyncValue<Map<String, int>>, String>((ref, uid) {
+  final userItems = ref.watch(userItemsProvider(uid));
   
   return userItems.whenData((items) {
     int reported = items.length;

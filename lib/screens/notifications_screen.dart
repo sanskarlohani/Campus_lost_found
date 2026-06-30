@@ -33,7 +33,7 @@ class NotificationsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_none_rounded, size: 80, color: colorScheme.primary.withOpacity(0.1)),
+                  Icon(Icons.notifications_none_rounded, size: 80, color: colorScheme.primary.withValues(alpha: 0.1)),
                   const SizedBox(height: 16),
                   const Text('No notifications yet', style: TextStyle(color: Colors.grey, fontSize: 16)),
                 ],
@@ -58,7 +58,7 @@ class NotificationsScreen extends ConsumerWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -69,7 +69,7 @@ class NotificationsScreen extends ConsumerWidget {
           elevation: 0,
           backgroundColor: colorScheme.surface,
           selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withOpacity(0.4),
+          unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
             switch (index) {
@@ -131,15 +131,15 @@ class NotificationTile extends ConsumerWidget {
         NotificationService().deleteNotification(notification.id);
       },
       child: Container(
-        color: notification.isRead ? Colors.transparent : colorScheme.primary.withOpacity(0.03),
+        color: notification.isRead ? Colors.transparent : colorScheme.primary.withValues(alpha: 0.03),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          leading: _getNotificationIcon(notification.type, colorScheme),
+          leading: _getNotificationIcon(notification.type, colorScheme, notification.isGlobal),
           title: Text(
             notification.title,
             style: TextStyle(
               fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.bold,
-              color: notification.isRead ? colorScheme.onSurface.withOpacity(0.7) : colorScheme.onSurface,
+              color: notification.isRead ? colorScheme.onSurface.withValues(alpha: 0.7) : colorScheme.onSurface,
             ),
           ),
           subtitle: Column(
@@ -148,12 +148,12 @@ class NotificationTile extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 notification.message,
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
+                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 4),
               Text(
                 _formatDate(notification.createdAt),
-                style: TextStyle(fontSize: 12, color: colorScheme.primary.withOpacity(0.7)),
+                style: TextStyle(fontSize: 12, color: colorScheme.primary.withValues(alpha: 0.7)),
               ),
             ],
           ),
@@ -168,7 +168,17 @@ class NotificationTile extends ConsumerWidget {
     );
   }
 
-  Widget _getNotificationIcon(String type, ColorScheme colorScheme) {
+  Widget _getNotificationIcon(String type, ColorScheme colorScheme, bool isGlobal) {
+    if (isGlobal) {
+      return Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.blue.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.campaign_rounded, color: Colors.blue, size: 24),
+      );
+    }
     IconData icon;
     Color color;
 
@@ -193,7 +203,7 @@ class NotificationTile extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color, size: 24),

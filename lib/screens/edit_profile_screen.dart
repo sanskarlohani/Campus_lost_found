@@ -92,7 +92,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: colorScheme.primary.withOpacity(0.1),
+                    backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                     child: Icon(Icons.person_outline_rounded, size: 50, color: colorScheme.primary),
                   ),
                   Positioned(
