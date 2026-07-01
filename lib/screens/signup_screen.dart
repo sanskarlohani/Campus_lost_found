@@ -43,15 +43,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         _nameController.text.trim(),
       );
       
-      final localContext = context;
-      if (!localContext.mounted) return;
+      if (!mounted) return;
       
       if (FirebaseAuth.instance.currentUser != null) {
         context.go(Routes.home);
       }
     } on FirebaseAuthException catch (e) {
-      final localContext = context;
-      if (!localContext.mounted) return;
+      if (!mounted) return;
       String message = 'An error occurred. Please try again.';
       if (e.code == 'email-already-in-use') {
         message = 'This email is already in use.';

@@ -66,18 +66,16 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   controller.text.trim(),
                 );
                 
-                final localContext = context;
-                if (!localContext.mounted) return;
-                ScaffoldMessenger.of(localContext).showSnackBar(
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Message sent successfully!'),
                     backgroundColor: Colors.green,
                   ),
                 );
               } catch (e) {
-                final localContext = context;
-                if (!localContext.mounted) return;
-                ScaffoldMessenger.of(localContext).showSnackBar(
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
                 );
               } finally {
@@ -108,16 +106,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       setState(() => _isActionLoading = true);
       try {
         await ref.read(lost_found.lostFoundServiceProvider).resolveItem(item.id);
-        final localContext = context;
-        if (!localContext.mounted) return;
-        Navigator.pop(localContext);
-        ScaffoldMessenger.of(localContext).showSnackBar(
+        if (!mounted) return;
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Item marked as resolved'), backgroundColor: Colors.green),
         );
       } catch (e) {
-        final localContext = context;
-        if (!localContext.mounted) return;
-        ScaffoldMessenger.of(localContext).showSnackBar(
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       } finally {
