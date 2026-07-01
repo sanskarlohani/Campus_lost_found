@@ -24,7 +24,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(isLostType ? 'I Found This' : 'Claim Item'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -50,14 +50,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               if (controller.text.trim().isEmpty) return;
               
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               setState(() => _isActionLoading = true);
               
               try {
@@ -66,16 +66,18 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   controller.text.trim(),
                 );
                 
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
+                final localContext = context;
+                if (!localContext.mounted) return;
+                ScaffoldMessenger.of(localContext).showSnackBar(
                   const SnackBar(
                     content: Text('Message sent successfully!'),
                     backgroundColor: Colors.green,
                   ),
                 );
               } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
+                final localContext = context;
+                if (!localContext.mounted) return;
+                ScaffoldMessenger.of(localContext).showSnackBar(
                   SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
                 );
               } finally {
@@ -106,14 +108,16 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       setState(() => _isActionLoading = true);
       try {
         await ref.read(lost_found.lostFoundServiceProvider).resolveItem(item.id);
-        if (!mounted) return;
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
+        final localContext = context;
+        if (!localContext.mounted) return;
+        Navigator.pop(localContext);
+        ScaffoldMessenger.of(localContext).showSnackBar(
           const SnackBar(content: Text('Item marked as resolved'), backgroundColor: Colors.green),
         );
       } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        final localContext = context;
+        if (!localContext.mounted) return;
+        ScaffoldMessenger.of(localContext).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       } finally {

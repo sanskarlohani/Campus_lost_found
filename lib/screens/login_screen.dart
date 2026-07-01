@@ -39,12 +39,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref.read(authProvider.notifier).signIn(email, password);
       
-      if (!mounted) return;
+      final localContext = context;
+      if (!localContext.mounted) return;
       if (FirebaseAuth.instance.currentUser != null) {
         context.go(Routes.home);
       }
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
+      final localContext = context;
+      if (!localContext.mounted) return;
       String message;
       switch (e.code) {
         case 'user-not-found':

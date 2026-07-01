@@ -44,8 +44,9 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
         setState(() => _pickedImage = image);
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      final localContext = context;
+      if (!localContext.mounted) return;
+      ScaffoldMessenger.of(localContext).showSnackBar(
         const SnackBar(content: Text('Error picking image')),
       );
     }
@@ -105,7 +106,8 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
 
       final createdItem = await service.createItem(item);
       
-      if (!mounted) return;
+      final localContext = context;
+      if (!localContext.mounted) return;
 
       // Create a global notification
       await NotificationService().createNotification(
@@ -117,21 +119,22 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
         isGlobal: true,
       );
       
-      if (!mounted) return;
+      if (!localContext.mounted) return;
       
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(localContext).showSnackBar(
         SnackBar(
           content: Text('Item reported successfully as $_type'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(localContext);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      final localContext = context;
+      if (!localContext.mounted) return;
+      ScaffoldMessenger.of(localContext).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          backgroundColor: Theme.of(localContext).colorScheme.error,
         ),
       );
     } finally {
