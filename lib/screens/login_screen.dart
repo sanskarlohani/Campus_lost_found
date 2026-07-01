@@ -45,16 +45,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      String message = 'An error occurred. Please try again.';
-      if (e.code == 'user-not-found') message = 'No user found with this email.';
-      else if (e.code == 'wrong-password') message = 'Incorrect password.';
-      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
-      else if (e.code == 'network-request-failed') message = 'Network error. Check your internet connection.';
-      
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No user found with this email.';
+          break;
+        case 'wrong-password':
+          message = 'Incorrect password.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is invalid.';
+          break;
+        case 'network-request-failed':
+          message = 'Network error. Please check your internet connection.';
+          break;
+        case 'too-many-requests':
+          message = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          message = 'Firebase Error (${e.code}): ${e.message}';
+      }
       _showError(message);
     } catch (e) {
       if (!mounted) return;
-      _showError(e.toString());
+      _showError('Unexpected Error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -66,6 +80,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'DISMISS',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
       ),
     );
   }

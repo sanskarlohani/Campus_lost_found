@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/providers/notification_provider.dart';
 
@@ -8,6 +9,7 @@ class LostFoundService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final NotificationService _notificationService = NotificationService();
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
   Future<LostFoundItem> createItem(LostFoundItem item) async {
     final user = _auth.currentUser;
@@ -28,6 +30,16 @@ class LostFoundService {
     );
 
     await docRef.set(itemWithUser.toJson());
+
+    // Log event
+    await _analytics.logEvent(
+      name: 'report_item',
+      parameters: {
+        'item_type': item.type,
+        'item_id': docRef.id,
+      },
+    );
+
     return itemWithUser;
   }
 
@@ -126,6 +138,15 @@ class LostFoundService {
       type: 'match',
       itemId: itemId,
     );
+
+    // Log claim event
+    await _analytics.logEvent(
+      name: 'claim_item',
+      parameters: {
+        'item_id': itemId,
+        'item_type': itemData['type'],
+      },
+    );
   }
 
   Future<void> updateItemStatus(String itemId, String status) async {
@@ -189,6 +210,15 @@ class LostFoundService {
     }
 
     await batch.commit();
+
+    // Log resolve event
+    await _analytics.logEvent(
+      name: 'resolve_item',
+      parameters: {
+        'item_id': itemId,
+        'item_type': itemType,
+      },
+    );
   }
 
   String getCurrentUserId() {
