@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unilink/models/notification.dart';
 import 'package:unilink/navigation/routes.dart';
 import 'package:unilink/providers/notification_provider.dart';
+import 'package:unilink/widgets/glass_container.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -14,6 +15,7 @@ class NotificationsScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
@@ -42,7 +44,7 @@ class NotificationsScreen extends ConsumerWidget {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.fromLTRB(0, 12, 0, 100),
             itemCount: notificationsList.length,
             separatorBuilder: (context, index) => const Divider(height: 1, indent: 72),
             itemBuilder: (context, index) {
@@ -54,52 +56,53 @@ class NotificationsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(child: Text('Error: $error')),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: GlassContainer(
+            borderRadius: 30,
+            blur: 20,
+            opacity: 0.7,
+            color: colorScheme.surface,
+            child: BottomNavigationBar(
+              currentIndex: 1,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              selectedItemColor: colorScheme.primary,
+              unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
+              type: BottomNavigationBarType.fixed,
+              showUnselectedLabels: false,
+              onTap: (index) {
+                switch (index) {
+                  case 0:
+                    context.go(Routes.home);
+                    break;
+                  case 1:
+                    break;
+                  case 2:
+                    context.go(Routes.profile);
+                    break;
+                }
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications_outlined),
+                  activeIcon: Icon(Icons.notifications_rounded),
+                  label: 'Alerts',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline_rounded),
+                  activeIcon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
             ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: 1,
-          elevation: 0,
-          backgroundColor: colorScheme.surface,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
-          type: BottomNavigationBarType.fixed,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                context.go(Routes.home);
-                break;
-              case 1:
-                break;
-              case 2:
-                context.go(Routes.profile);
-                break;
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_outlined),
-              activeIcon: Icon(Icons.notifications_rounded),
-              label: 'Alerts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -130,7 +133,7 @@ class NotificationTile extends ConsumerWidget {
       onDismissed: (_) {
         NotificationService().deleteNotification(notification.id);
       },
-      child: Container(
+      child: Material(
         color: notification.isRead ? Colors.transparent : colorScheme.primary.withValues(alpha: 0.03),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),

@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>UniLink needs access to your camera to take photos of lost or found items.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>UniLink needs access to your photo library to upload photos of lost or found items.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>UniLink needs access to your microphone (if needed for videos).</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

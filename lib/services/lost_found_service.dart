@@ -1,15 +1,35 @@
 import 'dart:developer' as dev;
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/providers/notification_provider.dart';
+import 'package:unilink/utils/karma_utils.dart';
 
 class LostFoundService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final NotificationService _notificationService = NotificationService();
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+
+  Future<String> uploadItemImage(File imageFile, String type) async {
+    try {
+      final fileName = 'item_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      // Separate folders for lost and found items
+      final folder = type == 'lost' ? 'lost_images' : 'found_images';
+      final storageRef = _storage.ref().child(folder).child(fileName);
+      
+      final uploadTask = await storageRef.putFile(imageFile);
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      dev.log('Error uploading image: $e', name: 'LostFoundService');
+      throw Exception('Failed to upload image');
+    }
+  }
 
   Future<LostFoundItem> createItem(LostFoundItem item) async {
     final user = _auth.currentUser;
@@ -27,6 +47,7 @@ class LostFoundService {
       userId: user.uid,
       timestamp: timestamp,
       status: item.status,
+      imageUrl: item.imageUrl,
     );
 
     await docRef.set(itemWithUser.toJson());
@@ -37,6 +58,7 @@ class LostFoundService {
       parameters: {
         'item_type': item.type,
         'item_id': docRef.id,
+        'has_image': item.imageUrl.isNotEmpty.toString(),
       },
     );
 
@@ -166,15 +188,9 @@ class LostFoundService {
     final reporterId = itemData['userId'] as String;
 
     final batch = _firestore.batch();
-    final Set<String> findersToReward = {};
+    final List<String> claimerIds = [];
 
-    // 2. Identify the hero (The Finder)
-    if (itemType == 'found') {
-      // Scenario: "I found this phone" -> Resolver (Reporter) is the finder
-      findersToReward.add(reporterId);
-    }
-
-    // 3. Mark associated claims as resolved and find finders of 'lost' items
+    // 2. Mark associated claims as resolved
     final claimsSnapshot = await _firestore
         .collection('claims')
         .where('itemId', isEqualTo: itemId)
@@ -183,27 +199,30 @@ class LostFoundService {
 
     for (var doc in claimsSnapshot.docs) {
       batch.update(doc.reference, {'status': 'resolved'});
-      
-      if (itemType == 'lost') {
-        // Scenario: "I lost my keys" -> The person who sent the claim is the finder
-        findersToReward.add(doc.data()['finderId'] as String);
-      }
+      claimerIds.add(doc.data()['finderId'] as String);
     }
+
+    // 3. Identify the heroes to reward using KarmaUtils
+    final findersToReward = KarmaUtils.identifyFindersToReward(
+      itemType: itemType,
+      reporterId: reporterId,
+      claimerIds: claimerIds,
+    );
 
     // 4. Update the item itself
     batch.update(itemDoc.reference, {'status': 'resolved'});
 
-    // 5. Award Karma Points (10 per person who helped)
+    // 5. Award Karma Points
     for (String finderId in findersToReward) {
       final userRef = _firestore.collection('users').doc(finderId);
       batch.update(userRef, {
-        'karmaPoints': FieldValue.increment(10),
+        'karmaPoints': FieldValue.increment(KarmaUtils.pointsPerReturn),
       });
       
       await _notificationService.createNotification(
         userId: finderId,
         title: 'Karma Points Earned! 🌟',
-        message: 'You earned 10 Karma points for helping return this item!',
+        message: 'You earned ${KarmaUtils.pointsPerReturn} Karma points for helping return this item!',
         type: 'match',
         itemId: itemId,
       );

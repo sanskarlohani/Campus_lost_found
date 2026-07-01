@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/navigation/routes.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:unilink/widgets/glass_container.dart';
 
 class ItemsList extends ConsumerWidget {
   final AsyncValue<List<LostFoundItem>> items;
@@ -87,7 +89,7 @@ class ItemsList extends ConsumerWidget {
 
   Widget _buildItemsList(BuildContext context, List<LostFoundItem> itemsList) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 100), // Bottom padding for glass nav bar
       itemCount: itemsList.length,
       physics: const AlwaysScrollableScrollPhysics(),
       itemBuilder: (context, index) {
@@ -146,7 +148,7 @@ class _ItemCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -159,7 +161,7 @@ class _ItemCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => context.push('${Routes.itemDetails}/${item.id}'),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -171,16 +173,28 @@ class _ItemCard extends StatelessWidget {
                   height: 100,
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Center(
-                    child: Icon(
-                      item.type == 'lost' 
-                        ? Icons.search_rounded 
-                        : Icons.inventory_2_outlined,
-                      color: colorScheme.primary,
-                      size: 32,
-                    ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: item.imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: item.imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                          )
+                        : Center(
+                            child: Icon(
+                              item.type == 'lost' 
+                                ? Icons.search_rounded 
+                                : Icons.inventory_2_outlined,
+                              color: colorScheme.primary,
+                              size: 32,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -192,12 +206,12 @@ class _ItemCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
+                          GlassContainer(
+                            borderRadius: 8,
+                            blur: 5,
+                            opacity: 0.1,
+                            color: item.type == 'lost' ? Colors.orange : Colors.green,
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: (item.type == 'lost' ? Colors.orange : Colors.green).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
                             child: Text(
                               item.type.toUpperCase(),
                               style: TextStyle(

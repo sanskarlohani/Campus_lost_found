@@ -5,6 +5,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
   Future<UserCredential> signIn(String email, String password) async {
     try {
       return await _auth.signInWithEmailAndPassword(

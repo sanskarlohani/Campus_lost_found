@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unilink/models/lost_found_item.dart';
-import 'package:unilink/providers/auth_provider.dart';
 import 'package:unilink/services/lost_found_service.dart';
 
 final lostFoundServiceProvider = Provider<LostFoundService>((ref) {

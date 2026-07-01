@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unilink/navigation/router_refresh.dart';
 import 'package:unilink/navigation/routes.dart';
+import 'package:unilink/providers/analytics_provider.dart';
+import 'package:unilink/providers/auth_provider.dart';
 import 'package:unilink/screens/home_screen.dart';
 import 'package:unilink/screens/item_detail_screen.dart';
 import 'package:unilink/screens/login_screen.dart';
@@ -14,17 +14,20 @@ import 'package:unilink/screens/report_item_screen.dart';
 import 'package:unilink/screens/signup_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final authState = ref.watch(authProvider);
+
   return GoRouter(
     // Re-run redirects when auth state changes
     refreshListenable: GoRouterRefreshStream(
-      FirebaseAuth.instance.authStateChanges(),
+      authService.authStateChanges,
     ),
     initialLocation: Routes.login,
     observers: [
-      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ref.watch(analyticsObserverProvider),
     ],
     redirect: (BuildContext context, GoRouterState state) {
-      final isAuth = FirebaseAuth.instance.currentUser != null;
+      final isAuth = authState.value != null;
       final isLoginRoute = state.matchedLocation == Routes.login;
       final isSignupRoute = state.matchedLocation == Routes.signup;
 
@@ -94,6 +97,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 GoRouter createRouter() => GoRouter(
   initialLocation: Routes.login,
   routes: [
-    GoRoute(path: Routes.login, builder: (context, state) => const Scaffold(body: Center(child: CircularProgressIndicator()))),
+    GoRoute(path: Routes.login,
+        builder: (context, state) => const Scaffold(body: Center(child: CircularProgressIndicator())
+        )
+    ),
   ],
 );

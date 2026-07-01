@@ -9,6 +9,7 @@ class LostFoundItem {
   final String userId;
   final int timestamp;
   final String status; // "active" or "claimed"
+  final String imageUrl;
 
   LostFoundItem({
     String? id,
@@ -19,6 +20,7 @@ class LostFoundItem {
     this.userId = '',
     int? timestamp,
     this.status = 'active',
+    this.imageUrl = '',
   })  : id = id ?? const Uuid().v4(),
         timestamp = timestamp ?? DateTime.now().millisecondsSinceEpoch;
 
@@ -32,6 +34,7 @@ class LostFoundItem {
       userId: json['userId'] as String? ?? '',
       timestamp: json['timestamp'] as int? ?? DateTime.now().millisecondsSinceEpoch,
       status: json['status'] as String? ?? 'active',
+      imageUrl: json['imageUrl'] as String? ?? '',
     );
   }
 
@@ -45,6 +48,7 @@ class LostFoundItem {
       'userId': userId,
       'timestamp': timestamp,
       'status': status,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -57,6 +61,7 @@ class LostFoundItem {
     String? userId,
     int? timestamp,
     String? status,
+    String? imageUrl,
   }) {
     return LostFoundItem(
       id: id ?? this.id,
@@ -67,6 +72,7 @@ class LostFoundItem {
       userId: userId ?? this.userId,
       timestamp: timestamp ?? this.timestamp,
       status: status ?? this.status,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

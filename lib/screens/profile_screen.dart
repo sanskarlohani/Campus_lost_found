@@ -6,7 +6,9 @@ import 'package:unilink/navigation/routes.dart';
 import 'package:unilink/providers/auth_provider.dart' as auth;
 import 'package:unilink/providers/lost_found_provider.dart' as lost_found;
 import 'package:unilink/providers/user_provider.dart' as user_prov;
+import 'package:unilink/providers/theme_provider.dart';
 import 'package:unilink/screens/edit_profile_screen.dart';
+import 'package:unilink/widgets/glass_container.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -26,9 +28,18 @@ class ProfileScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: const Text('My Profile'),
         actions: [
+          IconButton(
+            icon: Icon(
+              ref.watch(themeProvider) == ThemeMode.dark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+            ),
+            onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+          ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             onPressed: () async {
@@ -63,7 +74,6 @@ class ProfileScreen extends ConsumerWidget {
       ),
       body: userProfile.when(
         data: (user) {
-          // Check if profile is essentially empty (only name and email from signup)
           final isIncomplete = user == null || 
                               (user.sic.isEmpty && user.college.isEmpty);
 
@@ -98,7 +108,7 @@ class ProfileScreen extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
             child: Column(
               children: [
                 Center(
@@ -171,52 +181,53 @@ class ProfileScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(child: Text('Error: $error')),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: GlassContainer(
+            borderRadius: 30,
+            blur: 20,
+            opacity: 0.7,
+            color: colorScheme.surface,
+            child: BottomNavigationBar(
+              currentIndex: 2,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              selectedItemColor: colorScheme.primary,
+              unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
+              type: BottomNavigationBarType.fixed,
+              showUnselectedLabels: false,
+              onTap: (index) {
+                switch (index) {
+                  case 0:
+                    context.go(Routes.home);
+                    break;
+                  case 1:
+                    context.go(Routes.notifications);
+                    break;
+                  case 2:
+                    break;
+                }
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined),
+                  activeIcon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications_outlined),
+                  activeIcon: Icon(Icons.notifications_rounded),
+                  label: 'Alerts',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline_rounded),
+                  activeIcon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
             ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: 2,
-          elevation: 0,
-          backgroundColor: colorScheme.surface,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.4),
-          type: BottomNavigationBarType.fixed,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                context.go(Routes.home);
-                break;
-              case 1:
-                context.go(Routes.notifications);
-                break;
-              case 2:
-                break;
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_outlined),
-              activeIcon: Icon(Icons.notifications_rounded),
-              label: 'Alerts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -272,29 +283,44 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             SizedBox(
               width: cardWidth,
-              child: _StatCard(
-                label: 'Posts',
-                value: reported.toString(),
-                icon: Icons.upload_file_rounded,
+              child: GlassContainer(
                 color: Theme.of(context).colorScheme.primary,
+                opacity: 0.1,
+                borderRadius: 20,
+                child: _StatCard(
+                  label: 'Posts',
+                  value: reported.toString(),
+                  icon: Icons.upload_file_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             SizedBox(
               width: cardWidth,
-              child: _StatCard(
-                label: 'Resolved',
-                value: found.toString(),
-                icon: Icons.check_circle_rounded,
+              child: GlassContainer(
                 color: Colors.green,
+                opacity: 0.1,
+                borderRadius: 20,
+                child: _StatCard(
+                  label: 'Resolved',
+                  value: found.toString(),
+                  icon: Icons.check_circle_rounded,
+                  color: Colors.green,
+                ),
               ),
             ),
             SizedBox(
               width: cardWidth,
-              child: _StatCard(
-                label: 'Karma',
-                value: karma.toString(),
-                icon: Icons.auto_awesome_rounded,
+              child: GlassContainer(
                 color: Colors.orange,
+                opacity: 0.1,
+                borderRadius: 20,
+                child: _StatCard(
+                  label: 'Karma',
+                  value: karma.toString(),
+                  icon: Icons.auto_awesome_rounded,
+                  color: Colors.orange,
+                ),
               ),
             ),
           ],
@@ -338,7 +364,6 @@ class ProfileScreen extends ConsumerWidget {
                 );
               }
 
-              // Sort by karma descending
               final sortedUsers = [...users];
               sortedUsers.sort((a, b) => b.karmaPoints.compareTo(a.karmaPoints));
 
@@ -442,11 +467,6 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.1)),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

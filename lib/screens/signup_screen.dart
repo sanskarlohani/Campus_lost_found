@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:unilink/navigation/routes.dart';
 import 'package:unilink/providers/auth_provider.dart';
+import 'package:unilink/utils/validators.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -30,36 +31,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(value)) {
-      return 'Please enter a valid email';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    return null;
-  }
-
-  String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != _passwordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
-
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -80,10 +51,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       String message = 'An error occurred. Please try again.';
-      if (e.code == 'email-already-in-use') message = 'This email is already in use.';
-      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
-      else if (e.code == 'operation-not-allowed') message = 'Email/password accounts are not enabled.';
-      else if (e.code == 'weak-password') message = 'The password is too weak.';
+      if (e.code == 'email-already-in-use') {
+        message = 'This email is already in use.';
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is invalid.';
+      } else if (e.code == 'operation-not-allowed') {
+        message = 'Email/password accounts are not enabled.';
+      } else if (e.code == 'weak-password') {
+        message = 'The password is too weak.';
+      }
       
       _showError(message);
     } catch (e) {
@@ -143,12 +119,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   hintText: 'John Doe',
                 ),
                 textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Name is required';
-                  }
-                  return null;
-                },
+                validator: (value) => Validators.validateRequired(value, 'Name'),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -160,7 +131,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
-                validator: _validateEmail,
+                validator: Validators.validateEmail,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -177,7 +148,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.next,
-                validator: _validatePassword,
+                validator: Validators.validatePassword,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -188,7 +159,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
-                validator: _validateConfirmPassword,
+                validator: (value) => Validators.validateConfirmPassword(value, _passwordController.text),
                 onFieldSubmitted: (_) => _handleSignup(),
               ),
               const SizedBox(height: 32),

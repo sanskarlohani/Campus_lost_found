@@ -7,14 +7,16 @@ UniLink is a modern, high-performance Flutter application designed to bridge the
 ## ✨ Features
 
 - **Real-time Item Tracking**: Instant global updates when new items are reported as lost or found. No manual refreshing required.
-- **Market-Level UI/UX**: A clean, professional Indigo & Emerald theme featuring smooth transitions, Material 3 components, and a mobile-first responsive design.
+- **Image Support**: Users can capture and upload photos of items to increase the return success rate by over 70%.
+- **Market-Level UI/UX**: A clean, professional Indigo & Emerald theme featuring **Glassmorphism**, smooth transitions, and Material 3 components.
 - **Interactive Handover Workflow**: 
   - **Finders** can send direct "Found it" claims with location messages to owners.
   - **Owners** can securely verify and mark items as "Resolved" once returned.
-- **Gamified Karma System**: Earn **+10 Karma Points** for every successful item return. Build a reputation as a helpful community member.
-- **Rich User Profiles**: Mandatory university profile setup (SIC, Year, College) to ensure all interactions happen between verified campus members.
-- **Smart Notifications**: Instant alerts for matches, new claims, and Karma rewards.
-- **Detailed Item Views**: Collapsible headers, time-ago timestamps, and integrated reporter information.
+- **Gamified Karma System**: Earn **+10 Karma Points** for every successful item return. Build your reputation as a helpful community member.
+- **Campus Leaderboard**: Live rankings of top contributors to encourage helpful competition.
+- **Rich User Profiles**: Mandatory university profile setup (SIC, Year, College) for verified interactions.
+- **Smart Notifications**: Instant alerts for matches, new global reports, and Karma rewards.
+- **Adaptive Themes**: Full **Dark Mode** support with persistent user preferences.
 
 ---
 
@@ -24,33 +26,20 @@ UniLink is a modern, high-performance Flutter application designed to bridge the
 - **State Management**: [Riverpod](https://riverpod.dev/) (Reactive, predictable, and highly scalable state)
 - **Backend**: [Firebase](https://firebase.google.com/)
   - **Cloud Firestore**: Real-time NoSQL database with reactive Streams.
-  - **Firebase Authentication**: Secure Email/Password authentication.
-  - **Firebase Storage**: Hosting for item images.
-- **Navigation**: [GoRouter](https://pub.dev/packages/go_router) (Declarative routing with deep-link support)
-- **UI Components**: Material 3 with a customized professional theme.
+  - **Firebase Authentication**: Secure Email/Password authentication with Keychain sharing.
+  - **Firebase Storage**: Cloud storage for item photos.
+  - **Firebase Analytics**: Advanced tracking of user engagement and item return rates.
+- **Navigation**: [GoRouter](https://pub.dev/packages/go_router)
+- **UI Components**: Material 3 with a customized **Glassmorphism** engine.
 
 ---
 
 ## 📱 Cross-Platform & Real-Time Sync
 
 UniLink is designed to work seamlessly across the entire campus ecosystem:
-- **True Cross-Platform**: A single codebase powers **iOS**, **Android**, and **Web**, ensuring a uniform experience regardless of the device.
-- **Instant Synchronization**: Using Firestore Streams, actions performed by one user (like reporting a found item) are visible to all other users globally in under 100ms.
-- **Native Permissions**: Configured with internet and network client permissions for robust performance on Android and macOS/Web environments.
-
----
-
-## 📈 System Logic
-
-### The "Finder-Owner" Loop
-1. **Report**: An owner posts a "Lost" item.
-2. **Claim**: A finder sees the item, clicks "I Found This," and sends a meeting location message.
-3. **Notify**: The owner receives a "Match" alert instantly.
-4. **Resolve**: Upon meeting, the owner marks the item as "Resolved."
-5. **Reward**: The system automatically updates the claim status and awards the finder **Karma Points**.
-
-### Safety First
-We recommend all item exchanges happen in designated **Campus Safety Zones** such as the Library Reception, Main Canteen, or Campus Security Office.
+- **True Cross-Platform**: A single codebase powers **iOS**, **Android**, and **Web**, ensuring a uniform experience.
+- **Instant Synchronization**: Using Firestore Streams, actions are visible to all users globally in under 100ms.
+- **Native Security**: Configured with Keychain Sharing (Apple) and Multidex (Android) for maximum reliability.
 
 ---
 
@@ -67,8 +56,8 @@ We recommend all item exchanges happen in designated **Campus Safety Zones** suc
 3.  **Firebase Setup**:
     - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
     - Run `flutterfire configure` to generate `firebase_options.dart`.
-    - Enable **Firestore**, **Authentication**, and **Storage**.
-    - Deploy the provided `firestore.rules` for basic security.
+    - Download and link `GoogleService-Info.plist` (iOS/macOS) and `google-services.json` (Android).
+    - Enable **Firestore**, **Authentication**, **Storage**, and **Analytics**.
 4.  **Run the App**:
     ```bash
     flutter run

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:unilink/models/lost_found_item.dart';
@@ -143,16 +144,29 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                 expandedHeight: 300,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
-                    child: Center(
-                      child: Icon(
-                        item.type == 'lost' ? Icons.search_rounded : Icons.inventory_2_outlined,
-                        size: 100,
-                        color: colorScheme.primary.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
+                  background: item.imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: item.imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            child: const Center(child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            child: const Icon(Icons.error),
+                          ),
+                        )
+                      : Container(
+                          color: colorScheme.primary.withValues(alpha: 0.1),
+                          child: Center(
+                            child: Icon(
+                              item.type == 'lost' ? Icons.search_rounded : Icons.inventory_2_outlined,
+                              size: 100,
+                              color: colorScheme.primary.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
                 ),
               ),
               SliverToBoxAdapter(

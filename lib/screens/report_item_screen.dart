@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/providers/lost_found_provider.dart' as lost_found;
 import 'package:unilink/providers/notification_provider.dart';
+import 'package:unilink/widgets/glass_container.dart';
 
 class ReportItemScreen extends ConsumerStatefulWidget {
   const ReportItemScreen({super.key});
@@ -18,6 +21,8 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
   final _locationController = TextEditingController();
   String _type = 'lost';
   bool _isLoading = false;
+  XFile? _pickedImage;
+  final _picker = ImagePicker();
 
   @override
   void dispose() {
@@ -27,27 +32,84 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        // Compress image a little: reducing quality and size for storage efficiency
+        imageQuality: 50, 
+        maxWidth: 800,
+      );
+      if (image != null) {
+        setState(() => _pickedImage = image);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error picking image')),
+      );
+    }
+  }
+
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
+      String imageUrl = '';
+      final service = ref.read(lost_found.lostFoundServiceProvider);
+
+      // 1. Upload image if exists with type-based folder
+      if (_pickedImage != null) {
+        imageUrl = await service.uploadItemImage(File(_pickedImage!.path), _type);
+      }
+
+      // 2. Create item
       final item = LostFoundItem(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         location: _locationController.text.trim(),
         type: _type,
         status: 'active',
+        imageUrl: imageUrl,
       );
 
-      final createdItem = await ref.read(lost_found.lostFoundServiceProvider).createItem(item);
+      final createdItem = await service.createItem(item);
       
       if (!mounted) return;
 
-      // Create a global notification for all campus members
+      // Create a global notification
       await NotificationService().createNotification(
-        userId: ref.read(lost_found.lostFoundServiceProvider).getCurrentUserId(),
+        userId: service.getCurrentUserId(),
         title: 'New ${_type.toUpperCase()} Item Reported',
         message: _titleController.text,
         type: _type,
@@ -101,6 +163,56 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
                 'Provide details about the item you lost or found.',
                 style: TextStyle(color: Colors.grey),
               ),
+              const SizedBox(height: 32),
+              
+              // Image Picker Section
+              Center(
+                child: GestureDetector(
+                  onTap: _showImagePickerOptions,
+                  child: Container(
+                    width: double.infinity,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.2),
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: _pickedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.file(
+                              File(_pickedImage!.path),
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_a_photo_outlined, size: 40, color: colorScheme.primary),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Add a Photo',
+                                style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w600),
+                              ),
+                              const Text(
+                                'Increases chances of success by 70%',
+                                style: TextStyle(color: Colors.grey, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+              if (_pickedImage != null)
+                TextButton.icon(
+                  onPressed: () => setState(() => _pickedImage = null),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Remove Photo'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                ),
               const SizedBox(height: 32),
               
               // Type Selector
@@ -202,17 +314,16 @@ class _TypeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.2),
-            width: 2,
-          ),
+      child: GlassContainer(
+        borderRadius: 16,
+        blur: isSelected ? 5 : 15,
+        opacity: isSelected ? 0.8 : 0.05,
+        color: color,
+        border: Border.all(
+          color: isSelected ? color : color.withValues(alpha: 0.2),
+          width: 2,
         ),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           children: [
             Icon(
