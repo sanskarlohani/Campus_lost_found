@@ -66,7 +66,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   controller.text.trim(),
                 );
                 
-                if (!mounted) return;
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Message sent successfully!'),
@@ -74,7 +74,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   ),
                 );
               } catch (e) {
-                if (!mounted) return;
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
                 );
@@ -112,7 +112,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
           const SnackBar(content: Text('Item marked as resolved'), backgroundColor: Colors.green),
         );
       } catch (e) {
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:unilink/screens/profile_screen.dart';
 
 // Since _StatCard is private, I will test it through a helper or verify its visibility.
 // For now, I'll use a common pattern to test these dashboard components.

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:unilink/main.dart';
-import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/models/user.dart';
 import 'package:unilink/navigation/app_router.dart';
 import 'package:unilink/providers/lost_found_provider.dart';
@@ -38,13 +37,6 @@ void main() {
     testWidgets('Full Journey: Home Loads and Shows Live Items', (WidgetTester tester) async {
       // 1. Setup simulated data
       final testUser = User(uid: 'user-123', name: 'Test User', karmaPoints: 10);
-      final testItem = LostFoundItem(
-        id: 'item-1',
-        title: 'Lost Wallet',
-        userId: 'user-123',
-        type: 'lost',
-        status: 'active'
-      );
 
       // Create a simple router for testing to avoid Firebase dependency in app_router
       final testRouter = GoRouter(

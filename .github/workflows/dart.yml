@@ -19,6 +19,20 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Create dummy firebase_options.dart
+        run: |
+          echo "import 'package:firebase_core/firebase_core.dart';
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform {
+              return const FirebaseOptions(
+                apiKey: 'dummy',
+                appId: 'dummy',
+                messagingSenderId: 'dummy',
+                projectId: 'dummy',
+              );
+            }
+          }" > lib/firebase_options.dart
+
       - name: Install dependencies
         run: flutter pub get
 
