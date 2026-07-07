@@ -1,9 +1,9 @@
 import 'dart:developer' as dev;
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/providers/notification_provider.dart';
 import 'package:unilink/utils/karma_utils.dart';
@@ -15,14 +15,19 @@ class LostFoundService {
   final NotificationService _notificationService = NotificationService();
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
-  Future<String> uploadItemImage(File imageFile, String type) async {
+  Future<String> uploadItemImage(XFile imageFile, String type) async {
     try {
       final fileName = 'item_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      // Separate folders for lost and found items
       final folder = type == 'lost' ? 'lost_images' : 'found_images';
       final storageRef = _storage.ref().child(folder).child(fileName);
       
-      final uploadTask = await storageRef.putFile(imageFile);
+      // Use putData with bytes for full cross-platform compatibility (Web/Mobile/Desktop)
+      final bytes = await imageFile.readAsBytes();
+      final uploadTask = await storageRef.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
       final downloadUrl = await uploadTask.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {

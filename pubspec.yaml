@@ -47,6 +47,7 @@ dependencies:
   timeago: ^3.6.0
   image_picker: ^1.1.2
   cached_network_image: ^3.4.1
+  sqflite: ^2.4.0
 
 dev_dependencies:
   flutter_test:

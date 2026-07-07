@@ -90,7 +90,7 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
 
       // 1. Upload image if exists with type-based folder
       if (_pickedImage != null) {
-        imageUrl = await service.uploadItemImage(File(_pickedImage!.path), _type);
+        imageUrl = await service.uploadItemImage(_pickedImage!, _type);
       }
 
       // 2. Create item
