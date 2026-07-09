@@ -5,6 +5,7 @@ import 'package:unilink/models/lost_found_item.dart';
 import 'package:unilink/providers/lost_found_provider.dart' as lost_found;
 import 'package:unilink/providers/user_provider.dart' as user_prov;
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:unilink/widgets/profile_image.dart';
 
 class ItemDetailScreen extends ConsumerStatefulWidget {
   final String itemId;
@@ -243,9 +244,27 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             const SizedBox(height: 12),
                             Row(
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                                  child: Icon(Icons.person, color: colorScheme.primary),
+                                Consumer(
+                                  builder: (context, ref, child) {
+                                    final reporterAsync = ref.watch(user_prov.otherUserProfileProvider(item.userId));
+                                    return reporterAsync.when(
+                                      data: (reporter) => ProfileImage(
+                                        imageUrl: reporter?.profileImageUrl ?? '',
+                                        size: 40,
+                                        placeholderText: isOwner ? 'Y' : (reporter?.name.isNotEmpty == true ? reporter!.name[0].toUpperCase() : '?'),
+                                      ),
+                                      loading: () => Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: colorScheme.primary.withValues(alpha: 0.1),
+                                        ),
+                                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                      ),
+                                      error: (_, __) => const ProfileImage(imageUrl: '', size: 40),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(

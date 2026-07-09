@@ -9,6 +9,7 @@ import 'package:unilink/providers/user_provider.dart' as user_prov;
 import 'package:unilink/providers/theme_provider.dart';
 import 'package:unilink/screens/edit_profile_screen.dart';
 import 'package:unilink/widgets/glass_container.dart';
+import 'package:unilink/widgets/profile_image.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -120,13 +121,10 @@ class ProfileScreen extends ConsumerWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: colorScheme.primary, width: 2),
                         ),
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                          child: Text(
-                            user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                            style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: colorScheme.primary),
-                          ),
+                        child: ProfileImage(
+                          imageUrl: user.profileImageUrl,
+                          size: 120,
+                          placeholderText: user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                         ),
                       ),
                       Positioned(
@@ -382,24 +380,14 @@ class ProfileScreen extends ConsumerWidget {
                   
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: isTopThree 
-                          ? (index == 0 ? Colors.amber : (index == 1 ? Colors.grey.shade400 : Colors.brown.shade300))
-                          : colorScheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isTopThree ? Colors.white : colorScheme.primary,
-                          ),
-                        ),
-                      ),
+                    leading: ProfileImage(
+                      imageUrl: user.profileImageUrl,
+                      size: 40,
+                      backgroundColor: isTopThree 
+                        ? (index == 0 ? Colors.amber : (index == 1 ? Colors.grey.shade400 : Colors.brown.shade300))
+                        : colorScheme.primary.withValues(alpha: 0.1),
+                      placeholderText: '${index + 1}',
+                      textColor: isTopThree ? Colors.white : colorScheme.primary,
                     ),
                     title: Text(
                       user.name,

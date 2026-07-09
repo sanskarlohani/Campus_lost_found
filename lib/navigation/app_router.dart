@@ -12,6 +12,7 @@ import 'package:unilink/screens/notifications_screen.dart';
 import 'package:unilink/screens/profile_screen.dart';
 import 'package:unilink/screens/report_item_screen.dart';
 import 'package:unilink/screens/signup_screen.dart';
+import 'package:unilink/screens/splash_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authServiceProvider);
@@ -22,7 +23,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(
       authService.authStateChanges,
     ),
-    initialLocation: Routes.login,
+    initialLocation: Routes.splash,
     observers: [
       ref.watch(analyticsObserverProvider),
     ],
@@ -30,6 +31,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = authState.value != null;
       final isLoginRoute = state.matchedLocation == Routes.login;
       final isSignupRoute = state.matchedLocation == Routes.signup;
+      final isSplashRoute = state.matchedLocation == Routes.splash;
+
+      // If on splash, don't redirect yet (let the animation play)
+      if (isSplashRoute) return null;
 
       // If not authenticated and trying to access protected route, redirect to login
       if (!isAuth && !isLoginRoute && !isSignupRoute) {
@@ -44,6 +49,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // Splash route
+      GoRoute(
+        path: Routes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // Auth routes
       GoRoute(
         path: Routes.login,
@@ -95,11 +106,12 @@ final routerProvider = Provider<GoRouter>((ref) {
 
 // Legacy support for main.dart
 GoRouter createRouter() => GoRouter(
-  initialLocation: Routes.login,
+  initialLocation: Routes.splash,
   routes: [
-    GoRoute(path: Routes.login,
-        builder: (context, state) => const Scaffold(body: Center(child: CircularProgressIndicator())
-        )
+    GoRoute(
+      path: Routes.splash,
+      builder: (context, state) => const SplashScreen(),
     ),
+    GoRoute(path: Routes.login, builder: (context, state) => const Scaffold(body: Center(child: CircularProgressIndicator()))),
   ],
 );

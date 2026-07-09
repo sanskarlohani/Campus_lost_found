@@ -7,6 +7,7 @@ class User {
   final String college;
   final String uid;
   final int karmaPoints;
+  final String profileImageUrl;
 
   User({
     this.name = '',
@@ -15,6 +16,7 @@ class User {
     this.year = '',
     this.semester = '',
     this.college = '',
+    this.profileImageUrl = '',
     this.karmaPoints = 0,
     String? uid,
   }) : uid = uid ?? '';
@@ -29,6 +31,7 @@ class User {
       college: json['college'] as String? ?? '',
       karmaPoints: json['karmaPoints'] as int? ?? 0,
       uid: json['uid'] as String? ?? '',
+      profileImageUrl: json['profileImageUrl'] as String? ?? '',
     );
   }
 
@@ -41,6 +44,7 @@ class User {
       'semester': semester,
       'college': college,
       'uid': uid,
+      'profileImageUrl': profileImageUrl,
       'karmaPoints': karmaPoints,
     };
   }
@@ -54,6 +58,7 @@ class User {
     String? college,
     String? uid,
     int? karmaPoints,
+    String? profileImageUrl,
   }) {
     return User(
       name: name ?? this.name,
@@ -64,6 +69,7 @@ class User {
       college: college ?? this.college,
       uid: uid ?? this.uid,
       karmaPoints: karmaPoints ?? this.karmaPoints,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
     );
   }
 }

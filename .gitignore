@@ -84,6 +84,9 @@ app.*.map.json
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/macos/Flutter/ephemeral
 
+# SwiftPM
+**/xcshareddata/swiftpm/configuration/
+
 # Firebase related
 google-services.json
 GoogleService-Info.plist
@@ -125,3 +128,5 @@ test/coverage_helper_test.dart
 *.g.dart
 *.freezed.dart
 
+.vercel
+.env*
