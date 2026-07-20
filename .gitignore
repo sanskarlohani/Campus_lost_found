@@ -38,6 +38,7 @@ migrate_working_dir/
 /coverage/
 pubspec.lock
 .metadata
+.artifacts/
 
 # Web related
 
