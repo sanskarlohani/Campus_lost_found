@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Acid Streetwear Palette
-  static const primary = Color(0xFFD9F99D); // Acid Lime
-  static const secondary = Color(0xFFF472B6); // Hot Pink
-  static const accent = Color(0xFF818CF8); // Indigo for small highlights
+  // Energetic Brand Palette
+  static const primary = Color(0xFF2563EB); // Royal / Ocean Blue (Trust & Actions)
+  static const secondary = Color(0xFF10B981); // Emerald Green (Success & Found Items)
+  static const accent = Color(0xFFF59E0B); // Warm Amber / Orange (Alerts & Lost Badges)
 
-  // Neutral Palette
-  static const background = Color(0xFFF8FAFC);
-  static const surface = Colors.white;
-  static const textPrimary = Color(0xFF111827); // Deep Gray
-  static const textSecondary = Color(0xFF6B7280);
-  static const border = Color(0xFFE5E7EB);
+  // Neutral Palette (Light Mode)
+  static const background = Color(0xFFF8FAFC); // Crisp Slate Off-White
+  static const surface = Colors.white; // Pure White Container
+  static const textPrimary = Color(0xFF0F172A); // Deep Slate Navy
+  static const textSecondary = Color(0xFF64748B); // Cool Slate Gray
+  static const border = Color(0xFFE2E8F0); // Subtle Border
 
   // Status Colors
-  static const error = Color(0xFFEF4444);
-  static const success = Color(0xFF10B981);
+  static const error = Color(0xFFEF4444); // Bright Red
+  static const success = Color(0xFF10B981); // Emerald Green
+  static const warning = Color(0xFFF59E0B); // Warm Amber
 
-  // Dark Theme Colors (Deep Gray Focus)
-  static const darkBackground = Color(0xFF030712); // Near Black
-  static const darkSurface = Color(0xFF111827); // Deep Gray
-  static const darkTextPrimary = Color(0xFFF9FAFB);
-  static const darkTextSecondary = Color(0xFF9CA3AF);
-  static const darkBorder = Color(0xFF1F2937);
+  // Neutral Palette (Dark Mode - Deep Charcoal Focus)
+  static const darkBackground = Color(0xFF0B0F19); // Deep Midnight Slate
+  static const darkSurface = Color(0xFF151D2A); // Rich Charcoal Container
+  static const darkTextPrimary = Color(0xFFF8FAFC); // Crisp White Text
+  static const darkTextSecondary = Color(0xFF94A3B8); // Muted Slate Gray
+  static const darkBorder = Color(0xFF1E293B); // Dark Slate Border
 }
 
 class AppTheme {
@@ -31,12 +32,15 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        onPrimary: AppColors.textPrimary,
+        onPrimary: Colors.white,
         secondary: AppColors.secondary,
         onSecondary: Colors.white,
+        tertiary: AppColors.accent,
+        onTertiary: Colors.white,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
         error: AppColors.error,
+        onError: Colors.white,
       ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
@@ -44,10 +48,11 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
+        scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 20,
-          fontWeight: FontWeight.w800, // Heavier weight for Gen-Z feel
+          fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
       ),
@@ -55,7 +60,7 @@ class AppTheme {
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.border, width: 1.5),
         ),
       ),
@@ -64,32 +69,45 @@ class AppTheme {
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.textPrimary, // Dark buttons on light mode
-          foregroundColor: AppColors.primary, // Acid Lime text
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 0,
+          elevation: 2,
+          shadowColor: AppColors.primary.withValues(alpha: 0.3),
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            letterSpacing: 1,
+            letterSpacing: 0.5,
           ),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );
@@ -100,12 +118,15 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
-        onPrimary: AppColors.darkBackground,
+        onPrimary: Colors.white,
         secondary: AppColors.secondary,
         onSecondary: Colors.white,
+        tertiary: AppColors.accent,
+        onTertiary: Colors.black,
         surface: AppColors.darkSurface,
         onSurface: AppColors.darkTextPrimary,
         error: AppColors.error,
+        onError: Colors.white,
       ),
       scaffoldBackgroundColor: AppColors.darkBackground,
       appBarTheme: const AppBarTheme(
@@ -113,6 +134,7 @@ class AppTheme {
         foregroundColor: AppColors.darkTextPrimary,
         elevation: 0,
         centerTitle: true,
+        scrolledUnderElevation: 0,
         titleTextStyle: TextStyle(
           color: AppColors.darkTextPrimary,
           fontSize: 20,
@@ -124,40 +146,54 @@ class AppTheme {
         color: AppColors.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.darkBorder, width: 1.5),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.darkSurface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.darkBorder, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.darkBorder, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.darkBackground,
+          foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 0,
+          elevation: 3,
+          shadowColor: AppColors.primary.withValues(alpha: 0.4),
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            letterSpacing: 1,
+            letterSpacing: 0.5,
           ),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );
