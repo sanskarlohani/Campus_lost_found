@@ -16,6 +16,7 @@ class KarmaUtils {
       findersToReward.addAll(claimerIds);
     }
 
+    findersToReward.removeWhere((id) => id.trim().isEmpty);
     return findersToReward;
   }
 }

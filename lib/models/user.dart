@@ -29,7 +29,7 @@ class User {
       year: json['year'] as String? ?? '',
       semester: json['semester'] as String? ?? '',
       college: json['college'] as String? ?? '',
-      karmaPoints: json['karmaPoints'] as int? ?? 0,
+      karmaPoints: (json['karmaPoints'] as num?)?.toInt() ?? 0,
       uid: json['uid'] as String? ?? '',
       profileImageUrl: json['profileImageUrl'] as String? ?? '',
     );

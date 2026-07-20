@@ -44,7 +44,9 @@ class ProfileImage extends StatelessWidget {
       );
     }
 
-    final bool isSvg = imageUrl.endsWith('.svg') || imageUrl.contains('dicebear');
+    // Comprehensive check for SVGs/DiceBear
+    final bool isSvg = imageUrl.toLowerCase().contains('svg') || 
+                       imageUrl.toLowerCase().contains('dicebear');
 
     return Container(
       width: size,
@@ -61,8 +63,12 @@ class ProfileImage extends StatelessWidget {
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                placeholder: (context, url) => Center(
+                  child: SizedBox(
+                    width: size * 0.5,
+                    height: size * 0.5,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
                 errorWidget: (context, url, error) => Icon(
                   Icons.person,
@@ -77,19 +83,29 @@ class ProfileImage extends StatelessWidget {
   Widget _buildSvg(ColorScheme colorScheme) {
     // Skip real SVG rendering during automated widget tests to avoid Bad State crashes
     if (TestUtils.isWidgetTest()) {
-      return Icon(Icons.face, size: size * 0.8, color: colorScheme.primary);
+      return Icon(Icons.face_rounded, size: size * 0.7, color: colorScheme.primary);
     }
 
     return SvgPicture.network(
       imageUrl,
       width: size,
       height: size,
-      placeholderBuilder: (context) => const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
+      fit: BoxFit.contain,
+      // Add headers to help with Android network requests if needed
+      headers: const {
+        'Accept': 'image/svg+xml',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36',
+      },
+      placeholderBuilder: (context) => Center(
+        child: SizedBox(
+          width: size * 0.5,
+          height: size * 0.5,
+          child: const CircularProgressIndicator(strokeWidth: 2),
+        ),
       ),
       errorBuilder: (context, error, stackTrace) => Icon(
-        Icons.face,
-        size: size * 0.6,
+        Icons.face_rounded,
+        size: size * 0.7,
         color: colorScheme.primary,
       ),
     );

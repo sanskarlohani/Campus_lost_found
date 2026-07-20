@@ -1,15 +1,15 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 class TestUtils {
-  static bool get isTesting => kDebugMode && kIsWeb == false && 
-      const bool.fromEnvironment('flutter.native_bridge', defaultValue: false) == false &&
-      const bool.fromEnvironment('dart.library.io'); // heuristic for standard VM tests
-  
-  // A more reliable way to detect flutter test environment
+  /// Reliable way to detect if we are running in a 'flutter test' environment.
+  /// Works across all platforms including Web.
   static bool isWidgetTest() {
+    if (kIsWeb) {
+      return const bool.fromEnvironment('FLUTTER_TEST');
+    }
     try {
-      return (const bool.fromEnvironment('FLUTTER_TEST') || 
-              !kIsWeb && const bool.fromEnvironment('dart.library.io'));
+      return Platform.environment.containsKey('FLUTTER_TEST');
     } catch (_) {
       return false;
     }

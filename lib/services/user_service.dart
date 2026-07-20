@@ -14,12 +14,20 @@ class UserService {
     final currentUser = _auth.currentUser;
     if (currentUser == null) throw Exception('Not logged in');
 
-    await _firestore.collection('users').doc(currentUser.uid).update(
-      user.copyWith(
-        uid: currentUser.uid,
-        email: currentUser.email ?? user.email,
-      ).toJson(),
-    );
+    final data = <String, dynamic>{
+      'name': user.name,
+      'sic': user.sic,
+      'year': user.year,
+      'semester': user.semester,
+      'college': user.college,
+      'profileImageUrl': user.profileImageUrl,
+      'uid': currentUser.uid,
+    };
+    if (user.email.isNotEmpty) {
+      data['email'] = user.email;
+    }
+
+    await _firestore.collection('users').doc(currentUser.uid).update(data);
   }
 
   Future<String> uploadProfileImage(XFile imageFile) async {

@@ -43,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.link, color: Colors.white, size: 20),
+              child: Icon(Icons.link, color: colorScheme.onPrimary, size: 20),
             ),
             const SizedBox(width: 12),
             const Text('UniLink'),
@@ -84,7 +84,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         child: FloatingActionButton.extended(
           onPressed: () => context.push(Routes.report),
           backgroundColor: colorScheme.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: colorScheme.onPrimary,
           icon: const Icon(Icons.add),
           label: const Text('Report Item'),
           elevation: 4,

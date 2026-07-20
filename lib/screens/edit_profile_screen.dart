@@ -87,6 +87,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         semester: _semesterController.text.trim(),
         college: _collegeController.text.trim(),
         profileImageUrl: finalImageUrl,
+        karmaPoints: widget.initialUser?.karmaPoints ?? 0,
       );
 
       await service.updateProfile(user);
@@ -305,6 +306,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         url,
         width: size,
         height: size,
+        headers: const {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36',
+        },
         placeholderBuilder: (context) => const Center(
           child: CircularProgressIndicator(strokeWidth: 2),
         ),

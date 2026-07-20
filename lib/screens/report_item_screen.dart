@@ -82,6 +82,7 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final colorScheme = Theme.of(context).colorScheme;
     setState(() => _isLoading = true);
 
     try {
@@ -122,7 +123,7 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Item reported successfully as $_type'),
-          backgroundColor: Colors.green,
+          backgroundColor: colorScheme.secondary,
         ),
       );
       Navigator.pop(context);
@@ -223,7 +224,7 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
                       label: 'Lost',
                       icon: Icons.search_rounded,
                       isSelected: _type == 'lost',
-                      color: Colors.orange,
+                      color: colorScheme.primary,
                       onTap: () => setState(() => _type = 'lost'),
                     ),
                   ),
@@ -233,7 +234,7 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
                       label: 'Found',
                       icon: Icons.inventory_2_outlined,
                       isSelected: _type == 'found',
-                      color: Colors.green,
+                      color: colorScheme.secondary,
                       onTap: () => setState(() => _type = 'found'),
                     ),
                   ),
@@ -277,15 +278,15 @@ class _ReportItemScreenState extends ConsumerState<ReportItemScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _type == 'lost' ? Colors.orange : Colors.green,
+                  backgroundColor: _type == 'lost' ? colorScheme.primary : colorScheme.secondary,
                 ),
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary),
                       )
-                    : Text('Submit ${_type.toUpperCase()} Report'),
+                    : Text('Submit ${_type.toUpperCase()} Report', style: TextStyle(color: _type == 'lost' ? colorScheme.onPrimary : Colors.white)),
               ),
             ],
           ),
@@ -328,14 +329,14 @@ class _TypeButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? Colors.white : color,
+              color: isSelected ? (color == Theme.of(context).colorScheme.primary ? Theme.of(context).colorScheme.onPrimary : Colors.white) : color,
               size: 32,
             ),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : color,
+                color: isSelected ? (color == Theme.of(context).colorScheme.primary ? Theme.of(context).colorScheme.onPrimary : Colors.white) : color,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

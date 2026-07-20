@@ -75,6 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showError(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -83,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         duration: const Duration(seconds: 5),
         action: SnackBarAction(
           label: 'DISMISS',
-          textColor: Colors.white,
+          textColor: colorScheme.primary,
           onPressed: () {},
         ),
       ),
@@ -172,12 +173,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                         ),
                       )
                     : const Text('Login'),

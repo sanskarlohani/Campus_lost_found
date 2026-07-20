@@ -18,6 +18,15 @@ void main() {
       expect(user.karmaPoints, 50);
     });
 
+    test('User.fromJson handles double/num karmaPoints safely', () {
+      final json = {
+        'uid': 'user-123',
+        'karmaPoints': 50.0,
+      };
+      final user = User.fromJson(json);
+      expect(user.karmaPoints, 50);
+    });
+
     test('toJson includes profileImageUrl', () {
       final user = User(
         uid: 'user-123',

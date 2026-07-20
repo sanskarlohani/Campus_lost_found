@@ -23,6 +23,117 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6), // Slightly darker barrier
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: GlassContainer(
+          borderRadius: 32, // More rounded
+          blur: 25, // More blur for deeper glass look
+          opacity: 0.12,
+          color: colorScheme.surface,
+          padding: const EdgeInsets.all(28),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                ),
+                child: const Icon(Icons.logout_rounded, color: Colors.red, size: 36),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Sign Out',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Are you sure you want to leave UniLink? You\'ll need to sign in again to report or find items.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  fontSize: 15,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 36),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: const Text(
+                          'Logout', 
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    
+    if (confirm == true) {
+      await ref.read(auth.authProvider.notifier).signOut();
+      if (context.mounted) {
+        context.go(Routes.login);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfile = ref.watch(user_prov.userProfileProvider);
@@ -40,35 +151,6 @@ class ProfileScreen extends ConsumerWidget {
                   : Icons.dark_mode_rounded,
             ),
             onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Logout'),
-                  content: const Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              );
-              
-              if (confirm == true) {
-                await ref.read(auth.authProvider.notifier).signOut();
-                if (context.mounted) {
-                  context.go(Routes.login);
-                }
-              }
-            },
           ),
           const SizedBox(width: 8),
         ],
@@ -109,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 140),
             child: Column(
               children: [
                 Center(
@@ -171,6 +253,43 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 _buildLeaderboard(context, ref),
+                const SizedBox(height: 48),
+                
+                // Red Transparent Glass Logout Button
+                GestureDetector(
+                  onTap: () => _handleLogout(context, ref),
+                  child: GlassContainer(
+                    borderRadius: 24,
+                    blur: 15,
+                    opacity: 0.05,
+                    color: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.2), width: 1.5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        const Text(
+                          'Logout from Account',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 40),
               ],
             ),
